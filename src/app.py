@@ -488,7 +488,7 @@ class LuxuryRetailDashboard:
         st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True)
         
 
-        # Calcolo del coefficiente di correlazione di Pearson
+        # Calcolo del coefficiente di correlazione di Pearson #
         pearson_correlations = []
         for segment in df['price_segment'].unique():
             for season in df['season'].unique():
