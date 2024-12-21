@@ -445,26 +445,64 @@ class LuxuryRetailDashboard:
         
         # 1. Stagionalità per segmento di prodotto
         st.subheader("1. Stagionalità per Segmento di Prezzo")
-        
+
+        # Calcolo delle metriche stagionali per segmento
         seasonal_segment_perf = df.groupby(['price_segment', 'season'])['Total_Value'].agg([
-            'sum', 
-            'mean', 
-            'count'
+            'sum',  # Revenue totale
+            'mean',  # Revenue medio
+            'count'  # Numero di transazioni
         ]).reset_index()
-        
-        # Grafico a heatmap della stagionalità
+
+        # Pivot per la heatmap (Revenue totale)
         pivot_seasonal = seasonal_segment_perf.pivot(
             index='price_segment', 
             columns='season', 
             values='sum'
         )
-        
+
+        # Creazione della heatmap con annotazioni numeriche
         fig_seasonal = px.imshow(
             pivot_seasonal, 
             labels=dict(x="Stagione", y="Segmento Prezzo", color="Revenue (€)"),
-            title="Revenue per Segmento e Stagione"
+            title="Revenue per Segmento e Stagione",
+            text_auto='.2s'  # Aggiunge annotazioni automatiche con formato ridotto
         )
+
+        fig_seasonal.update_layout(
+            coloraxis_colorbar=dict(
+                title="Revenue (€)",
+                tickformat=".2s"  # Formatta i numeri con suffissi (K, M, etc.)
+            ),
+            font=dict(size=12),
+        )
+
         st.plotly_chart(fig_seasonal, use_container_width=True)
+
+        # Aggiunta di una tabella riepilogativa con valori di Revenue
+        st.subheader("Tabella Riepilogativa: Revenue per Segmento e Stagione")
+
+        # Tabella pivot con valori riepilogativi
+        pivot_table = seasonal_segment_perf.pivot_table(
+            index='price_segment', 
+            columns='season', 
+            values='sum', 
+            aggfunc='sum'
+        ).fillna(0)  # Sostituisci eventuali valori NaN con 0
+
+        # Formattazione dei valori in euro con separatore delle migliaia
+        pivot_table_display = pivot_table.applymap(lambda x: f"€{x:,.2f}")
+
+        # Mostra la tabella riepilogativa
+        st.dataframe(pivot_table_display, use_container_width=True)
+
+        # Spiegazione aggiuntiva per interpretare il grafico e la tabella
+        st.markdown("""
+        **Interpretazione del Grafico e della Tabella**
+        - La heatmap mostra il revenue totale per ciascun segmento di prodotto e stagione.
+        - Le annotazioni numeriche sul grafico rappresentano i valori esatti di revenue.
+        - La tabella riepilogativa sottostante fornisce una visione dettagliata e formattata dei dati.
+        - Utilizza queste informazioni per identificare i segmenti e le stagioni che generano il maggiore impatto sul revenue complessivo.
+        """)
         
         # Analisi statistica delle differenze stagionali
         st.markdown("**Test Statistico Stagionalità**")
@@ -521,7 +559,33 @@ class LuxuryRetailDashboard:
         st.subheader("Correlazione Segmenti-Stagionalità")
         st.dataframe(pearson_df, use_container_width=True)
 
-        
+        st.markdown("""
+            ### Interpretazione del Grafico: Revenue per Segmento e Stagione
+
+            - **Luxury**:
+            - Il revenue è distribuito uniformemente tra le stagioni, senza picchi evidenti.
+            - Questo conferma che non ci sono differenze significative tra stagioni (**p = 0.1147**, Test Statistico).
+            - Tuttavia, il segmento segue strettamente il trend complessivo delle vendite stagionali (**Rho = 0.9918**, Correlazione Lineare).
+
+            - **Premium**:
+            - Il revenue varia significativamente tra le stagioni, con il picco in **Fall** e il valore minimo in **Summer**.
+            - Questo è confermato dalle differenze significative tra stagioni rilevate dal Test Statistico (**p = 0**).
+            - La forte correlazione lineare (**Rho = 0.981**) indica che le variazioni interne seguono comunque il trend generale.
+
+            - **Budget**:
+            - Il revenue è più alto in **Fall** rispetto a **Summer**, mostrando variazioni stagionali pronunciate.
+            - Differenze significative tra stagioni sono confermate dal Test Statistico (**p = 0**).
+            - La correlazione lineare alta (**Rho = 0.9551**) suggerisce che, nonostante le variazioni interne, il segmento segue il trend complessivo.
+
+            - **Regular**:
+            - Le differenze stagionali sono evidenti, con il revenue massimo in **Fall** e minimo in **Summer**.
+            - Le differenze sono significative secondo il Test Statistico (**p = 0**).
+            - La correlazione lineare (**Rho = 0.9771**) mostra che il segmento è ben allineato con le vendite complessive.
+
+            ### Conclusione Generale
+            Il segmento **Luxury** si distingue per la sua uniformità stagionale, mentre gli altri segmenti presentano variazioni significative tra stagioni. Tuttavia, tutti i segmenti seguono strettamente le tendenze generali delle vendite stagionali.
+            """)
+
         # 2. Concentrazione delle vendite
         st.subheader("2. Concentrazione delle Vendite per Segmento")
         
