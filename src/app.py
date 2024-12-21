@@ -216,19 +216,14 @@ class LuxuryRetailDashboard:
         # Versione semplice senza gradient
         st.dataframe(summary_stats, use_container_width=True)
 
-        # Tabella riepilogativa con statistiche descrittive RFM per segmento
-        st.subheader("Statistiche Descrittive Metriche RFM per Segmento")
+        # Tabella riepilogativa con statistiche descrittive Monetary per segmento
+        st.subheader("Statistiche Descrittive Valore Speso per Segmento")
 
-        rfm_stats = pd.DataFrame()
-        for segment in rfm_means.index:
-            segment_stats = customer_stats[customer_stats['customer_segment'] == segment][['r_score', 'f_score', 'm_score']].describe().T
-            segment_stats['Segmento'] = segment
-            rfm_stats = pd.concat([rfm_stats, segment_stats])
+        monetary_stats = customer_stats.groupby('customer_segment')['total_spend'].describe().reset_index()
+        monetary_stats = monetary_stats[['customer_segment', 'min', 'max', 'mean', '25%', '50%', '75%']]
+        monetary_stats = monetary_stats.sort_values('customer_segment')
 
-        rfm_stats = rfm_stats[['Segmento', 'min', 'max', 'mean', '25%', '50%', '75%']]
-        rfm_stats = rfm_stats.sort_values('Segmento')
-
-        st.dataframe(rfm_stats, use_container_width=True)
+        st.dataframe(monetary_stats, use_container_width=True)
 
             
     def render_product_analysis(self, df):
