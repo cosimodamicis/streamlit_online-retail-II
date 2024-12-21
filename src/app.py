@@ -523,7 +523,7 @@ class LuxuryRetailDashboard:
                     'Significativo': 'Sì' if p_val < 0.05 else 'No'
                 })
         
-        st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True. hide_index=True)
+        st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True, hide_index=True)
         
 
         # Calcolo del coefficiente di correlazione di Pearson
