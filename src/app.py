@@ -216,8 +216,8 @@ class LuxuryRetailDashboard:
         # Versione semplice senza gradient
         st.dataframe(summary_stats, use_container_width=True)
 
-        # Tabella riepilogativa con statistiche descrittive Monetary per segmento
-        st.subheader("Statistiche Descrittive Valore Speso per Segmento")
+        # Tabella riepilogativa con statistiche descrittive Monetary per segmento (per Cliente)
+        st.subheader("Statistiche Descrittive Valore Speso per Segmento (per Cliente)")
 
         # Calcolo statistiche descrittive
         monetary_stats = customer_stats.groupby('customer_segment')['total_spend'].describe()
@@ -236,6 +236,42 @@ class LuxuryRetailDashboard:
         # Visualizzo la tabella
         st.dataframe(monetary_stats, use_container_width=True, hide_index=True)
 
+        # Seconda tabella (nuova, basata sugli ordini)
+        st.subheader("Statistiche Descrittive Valore Ordini per Segmento (per Ordine)")
+
+        # Uniamo i dati dei segmenti con i dati degli ordini
+        orders_by_segment = df.merge(
+            customer_stats[['customer_segment']], 
+            left_on='Customer ID', 
+            right_index=True
+        )
+
+        # Calcoliamo le statistiche per ordine
+        order_stats = orders_by_segment.groupby('customer_segment')['Total_Value'].describe()
+
+        # Calcolo il totale e lo inserisco dopo count
+        segment_order_totals = orders_by_segment.groupby('customer_segment')['Total_Value'].sum()
+        order_stats.insert(1, 'Total', segment_order_totals)
+
+        # Ordino per Total decrescente e resetto l'indice
+        order_stats = order_stats.sort_values('Total', ascending=False).reset_index()
+
+        # Formatto i valori monetari
+        for col in ['Total', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']:
+            order_stats[col] = order_stats[col].apply(lambda x: f"€{x:,.2f}")
+
+        # Visualizzo la tabella
+        st.dataframe(order_stats, use_container_width=True, hide_index=True)
+
+        # Aggiungiamo un commento esplicativo
+        st.markdown("""
+        **Confronto tra le tabelle:**
+        - La prima tabella mostra il comportamento lifetime dei clienti (quanto spende mediamente un cliente di ogni segmento)
+        - La seconda tabella mostra il comportamento per singolo ordine (quanto vale mediamente un ordine per ogni segmento)
+
+        Questo confronto evidenzia che mentre i clienti Loyal potrebbero spendere di più nel loro lifetime totale,
+        i clienti VIP tendono ad effettuare ordini di valore superiore ma potenzialmente meno frequenti.
+        """)
             
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
