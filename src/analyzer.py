@@ -13,6 +13,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, silhouette_score
 from typing import Dict, Tuple, List, Optional
+from scipy import stats
 
 from utils.preprocessing import (
     preprocess_data,

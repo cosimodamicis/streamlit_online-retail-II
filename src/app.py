@@ -220,206 +220,156 @@ class LuxuryRetailDashboard:
         st.dataframe(summary_stats, use_container_width=True)
     
     def render_segment_analysis(self, customer_stats, df):
-        # Tabella riepilogativa con statistiche descrittive Monetary per segmento (per Cliente)
+        """Render dell'analisi segmenti"""
+        # Prima tabella - sempre visibile
         st.subheader("Statistiche Descrittive Valore Speso per Segmento (per Cliente)")
-
-        # Calcolo statistiche descrittive
         monetary_stats = customer_stats.groupby('customer_segment')['total_spend'].describe()
-
-        # Calcolo il totale e lo inserisco dopo count
         segment_totals = customer_stats.groupby('customer_segment')['total_spend'].sum()
         monetary_stats.insert(1, 'Total', segment_totals)
-
-        # Ordino per Total decrescente e resetto l'indice
         monetary_stats = monetary_stats.sort_values('Total', ascending=False).reset_index()
-
-        # Formatto i valori monetari
+        
         for col in ['Total', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']:
             monetary_stats[col] = monetary_stats[col].apply(lambda x: f"€{x:,.2f}")
-
-        # Visualizzo la tabella
+        
         st.dataframe(monetary_stats, use_container_width=True, hide_index=True)
-
-        # Seconda tabella (nuova, basata sugli ordini)
+        
+        # Seconda tabella - sempre visibile
         st.subheader("Statistiche Descrittive Valore Ordini per Segmento (per Ordine)")
-
-        # Uniamo i dati dei segmenti con i dati degli ordini
         orders_by_segment = df.merge(
             customer_stats[['customer_segment']], 
             left_on='Customer ID', 
             right_index=True
         )
-
-        # Calcoliamo le statistiche per ordine
         order_stats = orders_by_segment.groupby('customer_segment')['Total_Value'].describe()
-
-        # Calcolo il totale e lo inserisco dopo count
         segment_order_totals = orders_by_segment.groupby('customer_segment')['Total_Value'].sum()
         order_stats.insert(1, 'Total', segment_order_totals)
-
-        # Ordino per Total decrescente e resetto l'indice
         order_stats = order_stats.sort_values('mean', ascending=False).reset_index()
-
-        # Formatto i valori monetari
+        
         for col in ['Total', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']:
             order_stats[col] = order_stats[col].apply(lambda x: f"€{x:,.2f}")
-
-        # Visualizzo la tabella
+        
         st.dataframe(order_stats, use_container_width=True, hide_index=True)
-
-        # Aggiungiamo un commento esplicativo
+        
+        # Insight base - sempre visibile
         st.markdown("""
         **Confronto tra le tabelle:**
         - La prima tabella mostra il comportamento lifetime dei clienti (quanto spende mediamente un cliente di ogni segmento)
         - La seconda tabella mostra il comportamento per singolo ordine (quanto vale mediamente un ordine per ogni segmento)
-
+        
         Questo confronto evidenzia che mentre i clienti Loyal potrebbero spendere di più nel loro lifetime totale,
         i clienti VIP tendono ad effettuare ordini di valore superiore ma potenzialmente meno frequenti.
         """)
-
-        # Spiegazione scelta del test
-        st.markdown("""
-        ### Test Statistico delle Differenze tra Segmenti
-        Utilizziamo il test di Kruskal-Wallis (ANOVA non parametrico) per validare le differenze osservate tra i segmenti, 
-        in quanto i dati di spesa tipicamente violano l'assunzione di omoschedasticità richiesta dall'ANOVA parametrica.
-        """)
-
-        # Eseguiamo il test di Kruskal-Wallis sia per lifetime value che per order value
         
-        # Test per lifetime value
-        h_stat_lifetime, p_val_lifetime = stats.kruskal(
-            *[group['total_spend'].values for name, group in customer_stats.groupby('customer_segment')]
+        # Pulsante per analisi statistica
+        if st.button("Mostra Analisi Statistica"):
+            st.markdown("""
+            ### Test Statistico delle Differenze tra Segmenti
+            Utilizziamo il test di Kruskal-Wallis (ANOVA non parametrico) per validare le differenze osservate tra i segmenti, 
+            in quanto i dati di spesa tipicamente violano l'assunzione di omoschedasticità richiesta dall'ANOVA parametrica.
+            """)
+            
+            # Test statistici
+            h_stat_lifetime, p_val_lifetime = stats.kruskal(
+                *[group['total_spend'].values for name, group in customer_stats.groupby('customer_segment')]
+            )
+            h_stat_order, p_val_order = stats.kruskal(
+                *[group['Total_Value'].values for name, group in orders_by_segment.groupby('customer_segment')]
+            )
+            
+            results_df = pd.DataFrame({
+                'Metrica': ['Lifetime Value', 'Order Value'],
+                'H-statistic': [h_stat_lifetime, h_stat_order],
+                'p-value': [p_val_lifetime, p_val_order],
+                'Significativo': ['Sì' if p < 0.05 else 'No' for p in [p_val_lifetime, p_val_order]]
+            })
+            
+            st.table(results_df.style.format({
+                'H-statistic': '{:.2f}',
+                'p-value': '{:.4f}'
+            }))
+            
+            st.markdown("""
+            **Interpretazione dei Risultati:**
+            I test confermano che esistono differenze statisticamente significative (p < 0.05) sia nel lifetime value che nel valore degli ordini 
+            tra i diversi segmenti di clienti. Questo supporta scientificamente la nostra segmentazione e conferma che i pattern di spesa 
+            osservati non sono casuali ma riflettono reali differenze nel comportamento d'acquisto.
+            """)
+        
+        # Selectbox per visualizzazioni
+        plot_type = st.selectbox(
+            "Scegli il tipo di visualizzazione",
+            ["Box Plot", "Violin Plot", "Nessuna Visualizzazione"],
+            index=2  # Default a "Nessuna Visualizzazione"
         )
-
-        # Test per order value
-        h_stat_order, p_val_order = stats.kruskal(
-            *[group['Total_Value'].values for name, group in orders_by_segment.groupby('customer_segment')]
-        )
-
-        # Creiamo una tabella con i risultati
-        results_df = pd.DataFrame({
-            'Metrica': ['Lifetime Value', 'Order Value'],
-            'H-statistic': [h_stat_lifetime, h_stat_order],
-            'p-value': [p_val_lifetime, p_val_order],
-            'Significativo': ['Sì' if p < 0.05 else 'No' for p in [p_val_lifetime, p_val_order]]
-        })
-
-        st.table(results_df.style.format({
-            'H-statistic': '{:.2f}',
-            'p-value': '{:.4f}'
-        }))
-
-        # Insight sui risultati
-        st.markdown("""
-        **Interpretazione dei Risultati:**
-        I test confermano che esistono differenze statisticamente significative (p < 0.05) sia nel lifetime value che nel valore degli ordini 
-        tra i diversi segmenti di clienti. Questo supporta scientificamente la nostra segmentazione e conferma che i pattern di spesa 
-        osservati non sono casuali ma riflettono reali differenze nel comportamento d'acquisto.
-        """)
-
-        # Test statistici (codice precedente invariato)
-        st.markdown("""
-        ### Test Statistico delle Differenze tra Segmenti
-        Utilizziamo il test di Kruskal-Wallis (ANOVA non parametrico) per validare le differenze osservate tra i segmenti, 
-        in quanto i dati di spesa tipicamente violano l'assunzione di omoschedasticità richiesta dall'ANOVA parametrica.
-        """)
-
-        # Test e tabella risultati (come prima)
-        # ...
-
-        # Ora aggiungiamo le visualizzazioni con Plotly
-        st.subheader("Visualizzazione delle Differenze tra Segmenti")
-
-        # Creiamo due box plot affiancati
-        col1, col2 = st.columns(2)
-
-        with col1:
-            fig_lifetime = go.Figure()
+        
+        if plot_type == "Box Plot":
+            st.subheader("Visualizzazione delle Differenze tra Segmenti")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                fig_lifetime = go.Figure()
+                for segment in customer_stats['customer_segment'].unique():
+                    fig_lifetime.add_trace(go.Box(
+                        y=customer_stats[customer_stats['customer_segment'] == segment]['total_spend'],
+                        name=segment,
+                        boxpoints='outliers'
+                    ))
+                fig_lifetime.update_layout(
+                    title="Distribuzione Lifetime Value per Segmento",
+                    yaxis_title="Lifetime Value (€)",
+                    showlegend=False,
+                    height=500,
+                    yaxis_type="log"
+                )
+                st.plotly_chart(fig_lifetime, use_container_width=True)
+            
+            with col2:
+                fig_order = go.Figure()
+                for segment in orders_by_segment['customer_segment'].unique():
+                    fig_order.add_trace(go.Box(
+                        y=orders_by_segment[orders_by_segment['customer_segment'] == segment]['Total_Value'],
+                        name=segment,
+                        boxpoints='outliers'
+                    ))
+                fig_order.update_layout(
+                    title="Distribuzione Order Value per Segmento",
+                    yaxis_title="Order Value (€)",
+                    showlegend=False,
+                    height=500,
+                    yaxis_type="log"
+                )
+                st.plotly_chart(fig_order, use_container_width=True)
+                
+        elif plot_type == "Violin Plot":
+            st.subheader("Distribuzione Dettagliata dei Valori")
+            fig_violin = go.Figure()
             
             for segment in customer_stats['customer_segment'].unique():
-                fig_lifetime.add_trace(go.Box(
+                fig_violin.add_trace(go.Violin(
+                    x=[f"{segment} - Lifetime" for _ in range(len(customer_stats[customer_stats['customer_segment'] == segment]))],
                     y=customer_stats[customer_stats['customer_segment'] == segment]['total_spend'],
-                    name=segment,
-                    boxpoints='outliers'
+                    name=f"{segment} - Lifetime",
+                    side='positive',
+                    meanline_visible=True,
+                    box_visible=True
                 ))
-            
-            fig_lifetime.update_layout(
-                title="Distribuzione Lifetime Value per Segmento",
-                yaxis_title="Lifetime Value (€)",
-                showlegend=False,
-                height=500
-            )
-            fig_lifetime.update_layout(yaxis_type="log")
-            st.plotly_chart(fig_lifetime, use_container_width=True)
-
-        with col2:
-            fig_order = go.Figure()
-            
-            for segment in orders_by_segment['customer_segment'].unique():
-                fig_order.add_trace(go.Box(
+                fig_violin.add_trace(go.Violin(
+                    x=[f"{segment} - Order" for _ in range(len(orders_by_segment[orders_by_segment['customer_segment'] == segment]))],
                     y=orders_by_segment[orders_by_segment['customer_segment'] == segment]['Total_Value'],
-                    name=segment,
-                    boxpoints='outliers'
+                    name=f"{segment} - Order",
+                    side='negative',
+                    meanline_visible=True,
+                    box_visible=True
                 ))
             
-            fig_order.update_layout(
-                title="Distribuzione Order Value per Segmento",
-                yaxis_title="Order Value (€)",
-                showlegend=False,
-                height=500
+            fig_violin.update_layout(
+                title="Confronto Distribuzioni: Lifetime Value vs Order Value",
+                yaxis_title="Valore (€)",
+                violinmode='overlay',
+                height=600,
+                yaxis_type="log"
             )
-            fig_order.update_layout(yaxis_type="log")
-            st.plotly_chart(fig_order, use_container_width=True)
-
-        # Aggiungiamo un violin plot per una visualizzazione più dettagliata
-        st.subheader("Distribuzione Dettagliata dei Valori")
-
-        fig_violin = go.Figure()
-
-        # Violin plot per lifetime value
-        for segment in customer_stats['customer_segment'].unique():
-            fig_violin.add_trace(go.Violin(
-                x=[f"{segment} - Lifetime" for _ in range(len(customer_stats[customer_stats['customer_segment'] == segment]))],
-                y=customer_stats[customer_stats['customer_segment'] == segment]['total_spend'],
-                name=f"{segment} - Lifetime",
-                side='positive',
-                meanline_visible=True,
-                box_visible=True
-            ))
-            
-            # Violin plot per order value
-            fig_violin.add_trace(go.Violin(
-                x=[f"{segment} - Order" for _ in range(len(orders_by_segment[orders_by_segment['customer_segment'] == segment]))],
-                y=orders_by_segment[orders_by_segment['customer_segment'] == segment]['Total_Value'],
-                name=f"{segment} - Order",
-                side='negative',
-                meanline_visible=True,
-                box_visible=True
-            ))
-
-        fig_violin.update_layout(
-            title="Confronto Distribuzioni: Lifetime Value vs Order Value",
-            yaxis_title="Valore (€)",
-            violinmode='overlay',
-            height=600
-        )
-        fig_violin.update_layout(yaxis_type="log")
-        st.plotly_chart(fig_violin, use_container_width=True)
-
-        # Aggiungiamo una spiegazione delle visualizzazioni
-        st.markdown("""
-        **Interpretazione delle Visualizzazioni:**
-        - I box plot mostrano chiaramente la differenza nella distribuzione dei valori tra i segmenti
-        - Il violin plot permette di vedere la forma completa della distribuzione, evidenziando come:
-        - I clienti VIP hanno ordini di valore più alto (Order Value)
-        - I clienti Loyal hanno un lifetime value complessivo maggiore
-        - La dispersione dei valori è diversa tra i segmenti
-        
-        Queste visualizzazioni supportano i risultati del test Kruskal-Wallis, mostrando non solo 
-        che le differenze sono statisticamente significative, ma anche come queste differenze 
-        si manifestano nella distribuzione dei valori.
-        """)
-            
+            st.plotly_chart(fig_violin, use_container_width=True)
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
         st.header("🛍️ Analisi Prodotti")
