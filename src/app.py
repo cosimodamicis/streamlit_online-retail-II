@@ -231,7 +231,7 @@ class LuxuryRetailDashboard:
         monetary_stats['Total'] = monetary_stats['Total'].apply(lambda x: f"€{x:.2f}")
 
         monetary_stats = monetary_stats.sort_values('Total', ascending=False)
-        st.dataframe(monetary_stats, use_container_width=True)
+        st.dataframe(monetary_stats, use_container_width=True, hide_index=True)
 
             
     def render_product_analysis(self, df):
