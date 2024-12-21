@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from analyzer import LuxuryRetailAnalyzer
 import numpy as np
-from plotly.subplots import make_subplots
+from plotly.subplots import make_subplots #added for advanced product insights
 import os
 from scipy import stats
 
