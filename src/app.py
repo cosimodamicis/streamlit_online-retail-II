@@ -533,6 +533,106 @@ class LuxuryRetailDashboard:
             
             st.dataframe(formatted_products, use_container_width=True)
             
+
+               # Nuova sezione di analisi dei segmenti di prezzo
+            st.header("Analisi Dettagliata dei Segmenti di Prezzo")
+            
+            # 1. Caratteristiche dei Segmenti di Prezzo
+            st.subheader("Caratteristiche dei Segmenti di Prezzo")
+            
+            # Calcoliamo le statistiche per segmento
+            price_stats = df.groupby('price_segment').agg({
+                'Price': ['min', 'max', 'mean', 'median', 'std'],
+                'StockCode': 'nunique'
+            }).round(2)
+            
+            # Calcoliamo la % di SKU
+            total_sku = price_stats[('StockCode', 'nunique')].sum()
+            price_stats[('StockCode', '%_SKU')] = (price_stats[('StockCode', 'nunique')] / total_sku * 100).round(1)
+            
+            # Formattazione per visualizzazione
+            price_stats_display = pd.DataFrame({
+                'Range Prezzo': [f"€{row[('Price', 'min')]:,.2f} - €{row[('Price', 'max')]:,.2f}" 
+                                for idx, row in price_stats.iterrows()],
+                'Prezzo Medio': [f"€{x:,.2f}" for x in price_stats[('Price', 'mean')]],
+                'Prezzo Mediano': [f"€{x:,.2f}" for x in price_stats[('Price', 'median')]],
+                'Dev. Standard': [f"€{x:,.2f}" for x in price_stats[('Price', 'std')]],
+                'Num. Prodotti': price_stats[('StockCode', 'nunique')],
+                '% sul Totale Prodotti': [f"{x}%" for x in price_stats[('StockCode', '%_SKU')]]
+            }, index=price_stats.index)
+            
+            st.dataframe(price_stats_display, use_container_width=True)
+            
+            # 2. Performance di Vendita per Segmento
+            st.subheader("Performance di Vendita per Segmento")
+            
+            segment_perf = df.groupby('price_segment').agg({
+                'Invoice': 'count',
+                'Quantity': 'sum',
+                'Total_Value': 'sum'
+            })
+            
+            # Calcoliamo le percentuali e l'AOV
+            segment_perf['% Volume'] = (segment_perf['Quantity'] / segment_perf['Quantity'].sum() * 100).round(1)
+            segment_perf['% Valore'] = (segment_perf['Total_Value'] / segment_perf['Total_Value'].sum() * 100).round(1)
+            segment_perf['AOV'] = (segment_perf['Total_Value'] / segment_perf['Invoice']).round(2)
+            
+            # Formattazione per visualizzazione
+            perf_display = pd.DataFrame({
+                'N. Transazioni': segment_perf['Invoice'].map('{:,.0f}'.format),
+                'Volume Totale': segment_perf['Quantity'].map('{:,.0f}'.format),
+                'Valore Totale': segment_perf['Total_Value'].map('€{:,.2f}'.format),
+                '% Volume': segment_perf['% Volume'].map('{}%'.format),
+                '% Valore': segment_perf['% Valore'].map('{}%'.format),
+                'AOV': segment_perf['AOV'].map('€{:,.2f}'.format)
+            }, index=segment_perf.index)
+            
+            st.dataframe(perf_display, use_container_width=True)
+            
+            # 3. Analisi Statistica
+            st.subheader("Analisi Statistica delle Differenze tra Segmenti")
+            
+            # Test per valore
+            st.markdown("**Test sulle differenze in termini di valore**")
+            h_stat_value, p_val_value = stats.kruskal(
+                *[group['Total_Value'].values for name, group in df.groupby('price_segment')]
+            )
+            
+            value_test = pd.DataFrame({
+                'Metrica': ['H-statistic', 'p-value', 'Esito'],
+                'Valore': [
+                    f"{h_stat_value:.2f}",
+                    f"{p_val_value:.4f}",
+                    'Differenze Significative' if p_val_value < 0.05 else 'Differenze Non Significative'
+                ]
+            })
+            
+            st.table(value_test)
+            
+            # Test per volume
+            st.markdown("**Test sulle differenze in termini di volume**")
+            h_stat_vol, p_val_vol = stats.kruskal(
+                *[group['Quantity'].values for name, group in df.groupby('price_segment')]
+            )
+            
+            volume_test = pd.DataFrame({
+                'Metrica': ['H-statistic', 'p-value', 'Esito'],
+                'Valore': [
+                    f"{h_stat_vol:.2f}",
+                    f"{p_val_vol:.4f}",
+                    'Differenze Significative' if p_val_vol < 0.05 else 'Differenze Non Significative'
+                ]
+            })
+            
+            st.table(volume_test)
+            
+            # Commento interpretativo
+            st.markdown("""
+            **Interpretazione dei Test Statistici:**
+            - Il test di Kruskal-Wallis verifica se esistono differenze significative tra i segmenti
+            - Un p-value < 0.05 indica differenze statisticamente significative
+            - I test sono stati eseguiti sia sul valore delle transazioni che sul volume
+            """)
         except Exception as e:
             st.error(f"Errore nell'analisi prodotti: {str(e)}")
             
