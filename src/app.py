@@ -432,6 +432,19 @@ class LuxuryRetailDashboard:
         """Render dell'analisi prodotti"""
         st.header("🛍️ Analisi Prodotti")
         
+        # Aggiungo la spiegazione della segmentazione
+        st.markdown("""
+        ### Segmentazione dei Prodotti
+
+        I prodotti sono stati categorizzati in quattro segmenti di prezzo utilizzando i quartili della distribuzione dei prezzi medi:
+        - **Budget**: prodotti con prezzo ≤ 25° percentile
+        - **Regular**: prodotti con prezzo tra 25° e 50° percentile
+        - **Premium**: prodotti con prezzo tra 50° e 75° percentile
+        - **Luxury**: prodotti con prezzo > 75° percentile
+
+        Questa segmentazione è relativa alla distribuzione dei prezzi nel dataset, garantendo una suddivisione bilanciata 
+        dei prodotti tra i segmenti (~25% in ogni segmento) e adattandosi automaticamente al range di prezzi presente nei dati.
+        """)
         try:
             # Assicuriamoci che StockCode sia una stringa
             df = df.copy()
@@ -441,12 +454,32 @@ class LuxuryRetailDashboard:
             col1, col2 = st.columns(2)
             
             with col1:
-                category_perf = df.groupby('price_segment')['Total_Value'].sum()
-                fig_cat = px.pie(
-                    values=category_perf.values,
-                    names=category_perf.index,
-                    title="Revenue per Categoria"
+                # Calcoliamo revenue e percentuali per categoria
+                category_perf = df.groupby('price_segment')['Total_Value'].sum().reset_index()
+                category_perf.columns = ['Segmento', 'Revenue']
+                total_revenue = category_perf['Revenue'].sum()
+                category_perf['Percentuale'] = (category_perf['Revenue'] / total_revenue * 100)
+
+                fig_cat = go.Figure()
+                fig_cat.add_trace(go.Bar(
+                    x=category_perf['Segmento'],
+                    y=category_perf['Revenue'],
+                    text=[f"€{r:,.0f}<br>({p:.1f}%)" for r, p in zip(
+                        category_perf['Revenue'],
+                        category_perf['Percentuale']
+                    )],
+                    textposition='auto',
+                ))
+
+                fig_cat.update_layout(
+                    title="Revenue per Categoria",
+                    xaxis_title="Segmento",
+                    yaxis_title="Revenue (€)",
+                    showlegend=False,
+                    height=400,
+                    xaxis={'categoryorder':'total descending'}  # Ordina le barre per valore decrescente
                 )
+
                 st.plotly_chart(fig_cat, use_container_width=True)
                 
             with col2:
@@ -459,7 +492,22 @@ class LuxuryRetailDashboard:
                     title="Trend Stagionale"
                 )
                 st.plotly_chart(fig_seasonal, use_container_width=True)
-                
+
+            # Aggiungo l'interpretazione del trend stagionale
+            st.markdown("""
+            ### Interpretazione del Trend Stagionale
+
+            Il grafico radar mostra la distribuzione stagionale delle vendite, evidenziando che:
+            - L'Autunno è il periodo di picco per le vendite
+            - Primavera e Inverno mantengono livelli di vendita simili, leggermente inferiori all'Autunno
+            - L'Estate registra le performance più basse
+
+            Questo pattern suggerisce:
+            - L'opportunità di rafforzare le strategie commerciali durante il periodo estivo
+            - La possibilità di capitalizzare ulteriormente sul picco autunnale
+            - La presenza di una base stabile di vendite durante Inverno e Primavera
+            """)
+
             # Top prodotti
             st.subheader("📈 Top Prodotti")
             
