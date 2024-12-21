@@ -4,12 +4,13 @@ version = "0.1.0"
 description = "Dashboard analytics per luxury retail"
 requires-python = ">=3.9"
 dependencies = [
-    "streamlit==1.31.0",
+    "streamlit>=1.31.0",
     "plotly>=5.19.0",
     "pandas>=2.2.0",
     "numpy>=1.26.0",
     "scikit-learn>=1.4.0",
     "openpyxl>=3.1.2"  # per leggere files Excel
+
 ]
 
 [build-system]

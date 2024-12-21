@@ -207,10 +207,10 @@ class LuxuryRetailDashboard:
             'Score Totale': rfm_means.mean(axis=1).round(2)
         }).sort_values('Score Totale', ascending=False)
         
-        st.dataframe(
-            summary_stats.style.background_gradient(subset=['Score Totale']),
-            use_container_width=True
-        )
+        # Versione semplice senza gradient
+        st.dataframe(summary_stats, use_container_width=True)
+
+
             
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
