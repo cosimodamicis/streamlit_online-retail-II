@@ -586,43 +586,50 @@ class LuxuryRetailDashboard:
             Il segmento **Luxury** si distingue per la sua uniformità stagionale, mentre gli altri segmenti presentano variazioni significative tra stagioni. Tuttavia, tutti i segmenti seguono strettamente le tendenze generali delle vendite stagionali.
             """)
 
-        # 2. Concentrazione delle vendite
-        st.subheader("2. Concentrazione delle Vendite per Segmento")
-        
-        # Calcolo della concentrazione usando la curva di Lorenz
+        # Calcolo della concentrazione per segmento
+        st.subheader("Curve di Concentrazione per Segmento")
+
+        # Funzione per calcolare la curva di Lorenz
         def calculate_lorenz_curve(values):
             """Calcola i punti per la curva di Lorenz"""
             sorted_values = np.sort(values)
             cumx = np.cumsum(sorted_values)
-            sumy = cumx / cumx[-1]
+            sumy = cumx / cumx[-1]  # Normalizzazione
             sumx = np.arange(1, len(sumy) + 1) / len(sumy)
             return sumx, sumy
-        
-        concentration_data = []
+
+        # Creazione del layout delle curve (una per segmento)
+        segments = df['price_segment'].unique()
         lorenz_figs = make_subplots(
-            rows=2, cols=2, 
-            subplot_titles=df['price_segment'].unique(),
+            rows=2, cols=2,
+            subplot_titles=segments,
             vertical_spacing=0.1,
             horizontal_spacing=0.05
         )
-        
-        for i, segment in enumerate(df['price_segment'].unique(), 1):
+
+        # Tabella di riepilogo
+        concentration_data = []
+
+        for i, segment in enumerate(segments):
+            # Filtra i dati per il segmento corrente
             segment_df = df[df['price_segment'] == segment]
             
             # Raggruppa per prodotto
             product_sales = segment_df.groupby('StockCode')['Total_Value'].sum().sort_values(ascending=False)
             
-            # Calcola concentrazione
+            # Calcolo della concentrazione
             total_sales = product_sales.sum()
-            top_5_pct = product_sales.head(int(len(product_sales) * 0.05)).sum() / total_sales * 100
+            top_5_products = product_sales.head(int(len(product_sales) * 0.05)).sum()
+            top_5_pct = (top_5_products / total_sales) * 100
             
             # Curva di Lorenz
             lorenz_x, lorenz_y = calculate_lorenz_curve(product_sales.values)
             
-            # Aggiungi alla figura
-            row = (i-1) // 2 + 1
-            col = (i-1) % 2 + 1
+            # Determina la posizione nel layout della figura
+            row = (i // 2) + 1
+            col = (i % 2) + 1
             
+            # Aggiungi tracce alla figura
             lorenz_figs.add_trace(
                 go.Scatter(x=lorenz_x, y=lorenz_y, name=segment, mode='lines'),
                 row=row, col=col
@@ -632,20 +639,29 @@ class LuxuryRetailDashboard:
                 row=row, col=col
             )
             
+            # Aggiungi i dati alla tabella
             concentration_data.append({
                 'Segmento': segment,
                 'Top 5% Prodotti Generano': f'{top_5_pct:.1f}%',
                 'N. Prodotti Totali': len(product_sales),
                 'N. Prodotti Top 5%': int(len(product_sales) * 0.05)
             })
-        
+
+        # Configurazione del layout del grafico
         lorenz_figs.update_layout(
             title="Curve di Concentrazione per Segmento",
-            height=800
+            height=800,
+            showlegend=False
         )
+
+        # Mostra il grafico
         st.plotly_chart(lorenz_figs, use_container_width=True)
-        
-        st.dataframe(pd.DataFrame(concentration_data), use_container_width=True, hide_index=True)
+
+        # Mostra la tabella riepilogativa
+        st.subheader("Tabella Riepilogativa della Concentrazione")
+        concentration_df = pd.DataFrame(concentration_data)
+        st.dataframe(concentration_df, use_container_width=True)
+
         
         # 3. Cross-selling tra segmenti
         st.subheader("3. Cross-Selling tra Segmenti")
