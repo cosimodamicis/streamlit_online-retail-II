@@ -137,7 +137,9 @@ class LuxuryRetailDashboard:
                 labels={'x': 'Segmento', 'y': 'Valore Medio Ordine (€)'}
             )
             st.plotly_chart(fig_avg, use_container_width=True)
-            
+    
+    def render_rfm_analysis(self, customer_stats):
+        
         # RFM Analysis
         st.subheader("📊 Analisi RFM")
         # 1. Radar Chart originale
@@ -216,7 +218,8 @@ class LuxuryRetailDashboard:
         
         # Versione semplice senza gradient
         st.dataframe(summary_stats, use_container_width=True)
-
+    
+    def render_segment_analysis(self, customer_stats, df):
         # Tabella riepilogativa con statistiche descrittive Monetary per segmento (per Cliente)
         st.subheader("Statistiche Descrittive Valore Speso per Segmento (per Cliente)")
 
@@ -550,20 +553,29 @@ class LuxuryRetailDashboard:
                 self.render_kpis(st.session_state.df, st.session_state.customer_stats)
                 
                 # Tabs per le analisi
-                tab1, tab2, tab3 = st.tabs([
+                tab1, tab2, tab3, tab4, tab5 = st.tabs([
                     "👥 Analisi Cliente",
+                    "📊 Analisi RFM",
+                    "🎯 Analisi Segmenti",
                     "🛍️ Analisi Prodotti",
                     "💡 Business Insights"
                 ])
                 
                 with tab1:
+                    # Mantenere solo la parte iniziale dell'analisi cliente
+                    # (fino a prima della sezione RFM)
                     self.render_customer_analysis(st.session_state.customer_stats, st.session_state.df)
                     
                 with tab2:
-                    self.render_product_analysis(st.session_state.df)
+                    self.render_rfm_analysis(st.session_state.customer_stats)
                     
                 with tab3:
-                    # Creiamo un analyzer temporaneo per gli insights
+                    self.render_segment_analysis(st.session_state.customer_stats, st.session_state.df)
+                    
+                with tab4:
+                    self.render_product_analysis(st.session_state.df)
+                    
+                with tab5:
                     analyzer = LuxuryRetailAnalyzer(st.session_state.df)
                     analyzer.df = st.session_state.df
                     analyzer.customer_stats = st.session_state.customer_stats
