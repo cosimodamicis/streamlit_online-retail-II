@@ -146,13 +146,12 @@ class LuxuryRetailDashboard:
         col1, col2 = st.columns(2)
         
         with col1:
-            # Radar Chart esistente
             fig_rfm = go.Figure(data=[
                 go.Scatterpolar(
                     r=row,
                     theta=['Recency', 'Frequency', 'Monetary'],
-                    name=segment,
-                    fill='toself'  # Aggiunto fill per maggiore impatto visivo
+                    name=segment
+                    # rimosso fill='toself'
                 ) for segment, row in rfm_means.iterrows()
             ])
             
