@@ -488,20 +488,35 @@ class LuxuryRetailDashboard:
         st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True)
         
 
-        # Calcolo del coefficiente di correlazione di Pearson #
+        # Calcolo del coefficiente di correlazione di Pearson
         pearson_correlations = []
+
+        # Calcolo delle serie delle vendite per ciascun segmento e per le stagioni
+        seasonal_totals = seasonal_segment_perf.groupby('season')['sum'].sum()
+
         for segment in df['price_segment'].unique():
-            for season in df['season'].unique():
-                segment_season_sales = seasonal_segment_perf.loc[(seasonal_segment_perf['price_segment'] == segment) & (seasonal_segment_perf['season'] == season), 'sum'].values[0]
-                total_season_sales = seasonal_segment_perf.loc[seasonal_segment_perf['season'] == season, 'sum'].sum()
-                rho, p_value = pearsonr(np.array([segment_season_sales]), np.array([total_season_sales]))
+            # Serie delle vendite per il segmento corrente
+            segment_sales = seasonal_segment_perf.loc[
+                seasonal_segment_perf['price_segment'] == segment
+            ].set_index('season')['sum']
+
+            # Controlla che le serie abbiano esattamente quattro valori
+            if len(segment_sales) == 4 and len(seasonal_totals) == 4:
+                # Calcola la correlazione
+                rho, p_value = pearsonr(segment_sales.values, seasonal_totals.values)
                 pearson_correlations.append({
                     'Segmento': segment,
-                    'Stagione': season,
                     'Rho': rho,
                     'p-value': p_value
                 })
-        
+            else:
+                pearson_correlations.append({
+                    'Segmento': segment,
+                    'Rho': None,
+                    'p-value': None
+                })
+
+        # Mostra i risultati in una tabella
         pearson_df = pd.DataFrame(pearson_correlations)
         st.subheader("Correlazione Segmenti-Stagionalità")
         st.dataframe(pearson_df, use_container_width=True)
