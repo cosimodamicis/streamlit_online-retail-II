@@ -11,6 +11,8 @@ import numpy as np
 from plotly.subplots import make_subplots #added for advanced product insights
 import os
 from scipy import stats
+from scipy.stats import pearsonr
+
 
 class LuxuryRetailDashboard:
     def __init__(self):
@@ -484,6 +486,26 @@ class LuxuryRetailDashboard:
                 })
         
         st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True)
+        
+
+        # Calcolo del coefficiente di correlazione di Pearson
+        pearson_correlations = []
+        for segment in df['price_segment'].unique():
+            for season in df['season'].unique():
+                segment_season_sales = seasonal_segment_perf.loc[(seasonal_segment_perf['price_segment'] == segment) & (seasonal_segment_perf['season'] == season), 'sum'].values[0]
+                total_season_sales = seasonal_segment_perf.loc[seasonal_segment_perf['season'] == season, 'sum'].sum()
+                rho, p_value = pearsonr(np.array([segment_season_sales]), np.array([total_season_sales]))
+                pearson_correlations.append({
+                    'Segmento': segment,
+                    'Stagione': season,
+                    'Rho': rho,
+                    'p-value': p_value
+                })
+        
+        pearson_df = pd.DataFrame(pearson_correlations)
+        st.subheader("Correlazione Segmenti-Stagionalità")
+        st.dataframe(pearson_df, use_container_width=True)
+
         
         # 2. Concentrazione delle vendite
         st.subheader("2. Concentrazione delle Vendite per Segmento")
