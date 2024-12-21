@@ -541,7 +541,33 @@ class LuxuryRetailDashboard:
             # Caratteristiche dei Segmenti di Prezzo
             st.header("Analisi Dettagliata dei Segmenti di Prezzo")
             st.subheader("Caratteristiche dei Segmenti di Prezzo")
-            
+
+            # Calcoliamo prima i quartili che definiscono i confini dei segmenti
+            product_avg_prices = df.groupby('StockCode')['Price'].mean()
+            price_percentiles = product_avg_prices.quantile([0.25, 0.5, 0.75])
+
+            # Creiamo prima la tabella con i range corretti
+            price_ranges = pd.DataFrame({
+                'Range Prezzo': [
+                    f"€0.00 - €{price_percentiles[0.25]:.2f}",
+                    f"€{price_percentiles[0.25]:.2f} - €{price_percentiles[0.50]:.2f}",
+                    f"€{price_percentiles[0.50]:.2f} - €{price_percentiles[0.75]:.2f}",
+                    f"€{price_percentiles[0.75]:.2f} - €{df['Price'].max():.2f}"
+                ]
+            }, index=['Budget', 'Regular', 'Premium', 'Luxury'])
+
+            st.dataframe(price_ranges, use_container_width=True)
+
+            st.markdown("""
+            **Nota sulla segmentazione:** 
+            I segmenti sono definiti sui prezzi medi dei prodotti usando i quartili della distribuzione:
+            - Budget: prodotti con prezzo medio fino al 25° percentile
+            - Regular: prodotti con prezzo medio tra il 25° e il 50° percentile
+            - Premium: prodotti con prezzo medio tra il 50° e il 75° percentile
+            - Luxury: prodotti con prezzo medio sopra il 75° percentile
+            """)
+
+            # Poi continuiamo con le altre statistiche
             price_stats = df.groupby('price_segment').agg({
                 'Price': ['min', 'max', 'mean', 'median', 'std'],
                 'StockCode': 'nunique'
