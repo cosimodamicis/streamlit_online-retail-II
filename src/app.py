@@ -349,7 +349,7 @@ class LuxuryRetailDashboard:
                 showlegend=False,
                 height=500
             )
-            
+            fig_lifetime.update_layout(yaxis_type="log")
             st.plotly_chart(fig_lifetime, use_container_width=True)
 
         with col2:
@@ -368,7 +368,7 @@ class LuxuryRetailDashboard:
                 showlegend=False,
                 height=500
             )
-            
+            fig_order.update_layout(yaxis_type="log")
             st.plotly_chart(fig_order, use_container_width=True)
 
         # Aggiungiamo un violin plot per una visualizzazione più dettagliata
@@ -403,7 +403,7 @@ class LuxuryRetailDashboard:
             violinmode='overlay',
             height=600
         )
-
+        fig_violin.update_layout(yaxis_type="log")
         st.plotly_chart(fig_violin, use_container_width=True)
 
         # Aggiungiamo una spiegazione delle visualizzazioni
