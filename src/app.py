@@ -204,7 +204,7 @@ class LuxuryRetailDashboard:
             'F Score': rfm_means['f_score'].round(2),
             'M Score': rfm_means['m_score'].round(2),
             'Score Medio': rfm_means.mean(axis=1).round(2)
-        }).sort_values('Score Totale', ascending=False)
+        }).sort_values('Score Medio', ascending=False)
         
         # Versione semplice senza gradient
         st.dataframe(summary_stats, use_container_width=True)
