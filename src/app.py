@@ -493,7 +493,7 @@ class LuxuryRetailDashboard:
         pivot_table_display = pivot_table.applymap(lambda x: f"€{x:,.2f}")
 
         # Mostra la tabella riepilogativa
-        st.dataframe(pivot_table_display, use_container_width=True)
+        st.dataframe(pivot_table_display, use_container_width=True, hide_index=True)
 
         # Spiegazione aggiuntiva per interpretare il grafico e la tabella
         st.markdown("""
@@ -523,7 +523,7 @@ class LuxuryRetailDashboard:
                     'Significativo': 'Sì' if p_val < 0.05 else 'No'
                 })
         
-        st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True)
+        st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True. hide_index=True)
         
 
         # Calcolo del coefficiente di correlazione di Pearson
@@ -557,7 +557,7 @@ class LuxuryRetailDashboard:
         # Mostra i risultati in una tabella
         pearson_df = pd.DataFrame(pearson_correlations)
         st.subheader("Correlazione Segmenti-Stagionalità")
-        st.dataframe(pearson_df, use_container_width=True)
+        st.dataframe(pearson_df, use_container_width=True, hide_index=True)
 
         st.markdown("""
             ### Interpretazione del Grafico: Revenue per Segmento e Stagione
@@ -645,7 +645,7 @@ class LuxuryRetailDashboard:
         )
         st.plotly_chart(lorenz_figs, use_container_width=True)
         
-        st.dataframe(pd.DataFrame(concentration_data), use_container_width=True)
+        st.dataframe(pd.DataFrame(concentration_data), use_container_width=True, hide_index=True)
         
         # 3. Cross-selling tra segmenti
         st.subheader("3. Cross-Selling tra Segmenti")
@@ -696,7 +696,7 @@ class LuxuryRetailDashboard:
         st.plotly_chart(fig_affinity, use_container_width=True)
         
         # Tabella riassuntiva
-        st.dataframe(affinity_matrix_pct.round(1), use_container_width=True)
+        st.dataframe(affinity_matrix_pct.round(1), use_container_width=True, hide_index=True)
         
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
@@ -805,7 +805,7 @@ class LuxuryRetailDashboard:
                 'Quantità': top_products['Quantity'].map('{:,}'.format)
             })
             
-            st.dataframe(formatted_products, use_container_width=True)
+            st.dataframe(formatted_products, use_container_width=True, hide_index=True)
             
             # Caratteristiche dei Segmenti di Prezzo
             st.header("Analisi Dettagliata dei Segmenti di Prezzo")
@@ -825,7 +825,7 @@ class LuxuryRetailDashboard:
                 ]
             }, index=['Budget', 'Regular', 'Premium', 'Luxury'])
 
-            st.dataframe(price_ranges, use_container_width=True)
+            st.dataframe(price_ranges, use_container_width=True , hide_index=True)
 
             st.markdown("""
             **Nota sulla segmentazione:** 
