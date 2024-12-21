@@ -120,8 +120,10 @@ class LuxuryRetailDashboard:
                 x='total_spend',
                 nbins=50,
                 title="Distribuzione Customer Value",
-                labels={'total_spend': 'Valore Totale (€)'}
+                labels={'total_spend': 'Valore Totale (€)', 'count': 'Numero Clienti (log)'}
             )
+            # Aggiungi scala logaritmica per l'asse Y
+            fig_value.update_layout(yaxis_type="log")
             st.plotly_chart(fig_value, use_container_width=True)
             
         with col2:
