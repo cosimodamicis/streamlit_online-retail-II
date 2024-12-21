@@ -139,24 +139,78 @@ class LuxuryRetailDashboard:
             
         # RFM Analysis
         st.subheader("📊 Analisi RFM")
+        # 1. Radar Chart originale
         rfm_cols = ['r_score', 'f_score', 'm_score']
         rfm_means = customer_stats.groupby('customer_segment')[rfm_cols].mean()
         
-        fig_rfm = go.Figure(data=[
-            go.Scatterpolar(
-                r=row,
-                theta=['Recency', 'Frequency', 'Monetary'],
-                name=segment
-            ) for segment, row in rfm_means.iterrows()
-        ])
+        col1, col2 = st.columns(2)
         
-        fig_rfm.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[1, 4])),
-            showlegend=True,
-            title="RFM Profile per Segmento"
+        with col1:
+            # Radar Chart esistente
+            fig_rfm = go.Figure(data=[
+                go.Scatterpolar(
+                    r=row,
+                    theta=['Recency', 'Frequency', 'Monetary'],
+                    name=segment,
+                    fill='toself'  # Aggiunto fill per maggiore impatto visivo
+                ) for segment, row in rfm_means.iterrows()
+            ])
+            
+            fig_rfm.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[1, 4])),
+                showlegend=True,
+                title="RFM Profile per Segmento"
+            )
+            st.plotly_chart(fig_rfm, use_container_width=True)
+        
+        with col2:
+            # Heatmap delle medie RFM per segmento
+            fig_heatmap = px.imshow(
+                rfm_means,
+                labels=dict(x="Metrica RFM", y="Segmento", color="Score"),
+                aspect="auto",
+                title="RFM Heatmap per Segmento"
+            )
+            st.plotly_chart(fig_heatmap, use_container_width=True)
+        
+        # 2. Distribuzione componenti RFM per segmento
+        st.subheader("Distribuzione Componenti RFM")
+        
+        metrics = {
+            'recency': 'Recency (giorni)',
+            'frequency': 'Frequency (ordini)',
+            'total_spend': 'Monetary (€)'
+        }
+        
+        tabs = st.tabs(list(metrics.values()))
+        
+        for tab, (metric, label) in zip(tabs, metrics.items()):
+            with tab:
+                fig_dist = px.box(
+                    customer_stats,
+                    x='customer_segment',
+                    y=metric,
+                    color='customer_segment',
+                    title=f"Distribuzione {label} per Segmento",
+                    points="all"  # mostra tutti i punti oltre al box plot
+                )
+                fig_dist.update_layout(showlegend=False)
+                st.plotly_chart(fig_dist, use_container_width=True)
+        
+        # 3. Tabella riassuntiva RFM
+        st.subheader("Metriche RFM per Segmento")
+        summary_stats = pd.DataFrame({
+            'Segmento': rfm_means.index,
+            'R Score': rfm_means['r_score'].round(2),
+            'F Score': rfm_means['f_score'].round(2),
+            'M Score': rfm_means['m_score'].round(2),
+            'Score Totale': rfm_means.mean(axis=1).round(2)
+        }).sort_values('Score Totale', ascending=False)
+        
+        st.dataframe(
+            summary_stats.style.background_gradient(subset=['Score Totale']),
+            use_container_width=True
         )
-        
-        st.plotly_chart(fig_rfm, use_container_width=True)
             
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
