@@ -156,7 +156,46 @@ class LuxuryRetailDashboard:
                 labels={'x': 'Segmento', 'y': 'Valore Medio Ordine (€)'}
             )
             st.plotly_chart(fig_avg, use_container_width=True)
-    
+        
+        """Render dell'analisi segmenti"""
+        # Prima tabella - sempre visibile
+        st.subheader("Statistiche Descrittive Valore Speso per Segmento (per Cliente)")
+        monetary_stats = customer_stats.groupby('customer_segment')['total_spend'].describe()
+        segment_totals = customer_stats.groupby('customer_segment')['total_spend'].sum()
+        monetary_stats.insert(1, 'Total', segment_totals)
+        monetary_stats = monetary_stats.sort_values('Total', ascending=False).reset_index()
+        
+        for col in ['Total', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']:
+            monetary_stats[col] = monetary_stats[col].apply(lambda x: f"€{x:,.2f}")
+        
+        st.dataframe(monetary_stats, use_container_width=True, hide_index=True)
+        
+        # Seconda tabella - sempre visibile
+        st.subheader("Statistiche Descrittive Valore Ordini per Segmento (per Ordine)")
+        orders_by_segment = df.merge(
+            customer_stats[['customer_segment']], 
+            left_on='Customer ID', 
+            right_index=True
+        )
+        order_stats = orders_by_segment.groupby('customer_segment')['Total_Value'].describe()
+        segment_order_totals = orders_by_segment.groupby('customer_segment')['Total_Value'].sum()
+        order_stats.insert(1, 'Total', segment_order_totals)
+        order_stats = order_stats.sort_values('mean', ascending=False).reset_index()
+        
+        for col in ['Total', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']:
+            order_stats[col] = order_stats[col].apply(lambda x: f"€{x:,.2f}")
+        
+        st.dataframe(order_stats, use_container_width=True, hide_index=True)
+        
+        # Insight base - sempre visibile
+        st.markdown("""
+        **Confronto tra le tabelle:**
+        - La prima tabella mostra il comportamento lifetime dei clienti (quanto spende mediamente un cliente di ogni segmento)
+        - La seconda tabella mostra il comportamento per singolo ordine (quanto vale mediamente un ordine per ogni segmento)
+        
+        Questo confronto evidenzia che mentre i clienti Loyal potrebbero spendere di più nel loro lifetime totale,
+        i clienti VIP tendono ad effettuare ordini di valore superiore ma potenzialmente meno frequenti.
+        """)
     def render_rfm_analysis(self, customer_stats):
         
         # RFM Analysis
