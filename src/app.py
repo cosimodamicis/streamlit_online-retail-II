@@ -104,12 +104,31 @@ class LuxuryRetailDashboard:
         st.header("👥 Analisi Cliente")
         
         # Segmentazione clienti
-        segment_dist = customer_stats['customer_segment'].value_counts()
-        fig_segments = px.pie(
-            values=segment_dist.values,
-            names=segment_dist.index,
-            title="Distribuzione Segmenti Cliente"
+        segment_dist = customer_stats['customer_segment'].value_counts().reset_index()
+        segment_dist.columns = ['Segmento', 'Numero Clienti']
+        total_customers = segment_dist['Numero Clienti'].sum()
+        segment_dist['Percentuale'] = (segment_dist['Numero Clienti'] / total_customers * 100)
+
+        fig_segments = go.Figure()
+        fig_segments.add_trace(go.Bar(
+            x=segment_dist['Segmento'],
+            y=segment_dist['Numero Clienti'],
+            text=[f"n: {n:,.0f}<br>({p:.1f}%)" for n, p in zip(
+                segment_dist['Numero Clienti'], 
+                segment_dist['Percentuale']
+            )],
+            textposition='auto',
+        ))
+
+        fig_segments.update_layout(
+            title="Distribuzione Segmenti Cliente",
+            xaxis_title="Segmento",
+            yaxis_title="Numero Clienti",
+            showlegend=False,
+            height=400,
+            xaxis={'categoryorder':'total descending'}  # Ordina le barre per valore decrescente
         )
+
         st.plotly_chart(fig_segments, use_container_width=True)
         
         # Customer Value Distribution
