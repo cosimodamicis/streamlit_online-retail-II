@@ -220,7 +220,7 @@ class LuxuryRetailDashboard:
         st.subheader("Statistiche Descrittive Valore Speso per Segmento")
 
         monetary_stats = customer_stats.groupby('customer_segment')['total_spend'].describe().reset_index()
-        monetary_stats = monetary_stats[['customer_segment', 'min', 'max', 'mean', '25%', 'median', '75%']]
+        monetary_stats = monetary_stats[['customer_segment', 'min', 'max', 'mean', '25%', '50%', '75%']]
         monetary_stats['Total'] = monetary_stats['mean'] * customer_stats.groupby('customer_segment')['Customer ID'].count()
         monetary_stats = monetary_stats.sort_values('Total', ascending=False)
 
@@ -228,7 +228,7 @@ class LuxuryRetailDashboard:
         monetary_stats['max'] = monetary_stats['max'].apply(lambda x: f"€{x:.2f}")  
         monetary_stats['mean'] = monetary_stats['mean'].apply(lambda x: f"€{x:.2f}")
         monetary_stats['25%'] = monetary_stats['25%'].apply(lambda x: f"€{x:.2f}")
-        monetary_stats['median'] = monetary_stats['median'].apply(lambda x: f"€{x:.2f}")
+        monetary_stats['50%'] = monetary_stats['50%'].apply(lambda x: f"€{x:.2f}")
         monetary_stats['75%'] = monetary_stats['75%'].apply(lambda x: f"€{x:.2f}")
         monetary_stats['Total'] = monetary_stats['Total'].apply(lambda x: f"€{x:.2f}")
 
