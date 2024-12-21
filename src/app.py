@@ -219,18 +219,21 @@ class LuxuryRetailDashboard:
         # Tabella riepilogativa con statistiche descrittive Monetary per segmento
         st.subheader("Statistiche Descrittive Valore Speso per Segmento")
 
-        monetary_stats = customer_stats.groupby('customer_segment')['total_spend'].describe().reset_index()
-        monetary_stats['Total'] = customer_stats.groupby('customer_segment')['total_spend'].sum()
+        # Calcolo statistiche descrittive
+        monetary_stats = customer_stats.groupby('customer_segment')['total_spend'].describe()
 
-        monetary_stats['min'] = monetary_stats['min'].apply(lambda x: f"€{x:.2f}")
-        monetary_stats['max'] = monetary_stats['max'].apply(lambda x: f"€{x:.2f}")
-        monetary_stats['mean'] = monetary_stats['mean'].apply(lambda x: f"€{x:.2f}")
-        monetary_stats['25%'] = monetary_stats['25%'].apply(lambda x: f"€{x:.2f}")
-        monetary_stats['median'] = monetary_stats['50%'].apply(lambda x: f"€{x:.2f}")
-        monetary_stats['75%'] = monetary_stats['75%'].apply(lambda x: f"€{x:.2f}")
-        monetary_stats['Total'] = monetary_stats['Total'].apply(lambda x: f"€{x:.2f}")
+        # Calcolo il totale e lo inserisco dopo count
+        segment_totals = customer_stats.groupby('customer_segment')['total_spend'].sum()
+        monetary_stats.insert(1, 'Total', segment_totals)
 
-        monetary_stats = monetary_stats.sort_values('Total', ascending=False)
+        # Ordino per Total decrescente e resetto l'indice
+        monetary_stats = monetary_stats.sort_values('Total', ascending=False).reset_index()
+
+        # Formatto i valori monetari
+        for col in ['Total', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']:
+            monetary_stats[col] = monetary_stats[col].apply(lambda x: f"€{x:,.2f}")
+
+        # Visualizzo la tabella
         st.dataframe(monetary_stats, use_container_width=True, hide_index=True)
 
             
