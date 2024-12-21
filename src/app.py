@@ -194,6 +194,7 @@ class LuxuryRetailDashboard:
                     points="all"  # mostra tutti i punti oltre al box plot
                 )
                 fig_dist.update_layout(showlegend=False)
+                fig_value.update_layout(yaxis_type="log")
                 st.plotly_chart(fig_dist, use_container_width=True)
         
         # 3. Tabella riassuntiva RFM
