@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from analyzer import LuxuryRetailAnalyzer
+import os
 
 class LuxuryRetailDashboard:
     def __init__(self):
@@ -17,11 +18,52 @@ class LuxuryRetailDashboard:
             layout="wide"
         )
         
+        # Inizializza session state
+        if 'df' not in st.session_state:
+            st.session_state.df = None
+        if 'customer_stats' not in st.session_state:
+            st.session_state.customer_stats = None
+        if 'data_loaded' not in st.session_state:
+            st.session_state.data_loaded = False
+            
     def render_header(self):
         """Render dell'header"""
         st.title("💎 Luxury Retail Analytics")
         st.markdown("Dashboard per analisi dati retail nel settore lusso")
-        
+            
+    def load_default_dataset(self):
+        """Carica il dataset di default dalla cartella data"""
+        try:
+            default_path = os.path.join('data', 'online_retail_II.xlsx')
+            df = pd.read_excel(default_path)
+            analyzer = LuxuryRetailAnalyzer(df)
+            df, customer_stats = analyzer.process_data()
+            
+            # Salva in session state
+            st.session_state.df = df
+            st.session_state.customer_stats = customer_stats
+            st.session_state.data_loaded = True
+            
+            st.success("Dataset di default caricato con successo!")
+        except Exception as e:
+            st.error(f"Errore nel caricamento del dataset di default: {str(e)}")
+            
+    def load_custom_dataset(self, uploaded_file):
+        """Carica il dataset da file caricato"""
+        try:
+            df = pd.read_excel(uploaded_file)
+            analyzer = LuxuryRetailAnalyzer(df)
+            df, customer_stats = analyzer.process_data()
+            
+            # Salva in session state
+            st.session_state.df = df
+            st.session_state.customer_stats = customer_stats
+            st.session_state.data_loaded = True
+            
+            st.success("File caricato con successo!")
+        except Exception as e:
+            st.error(f"Errore nel caricamento del file: {str(e)}")
+            
     def render_kpis(self, df, customer_stats):
         """Render dei KPI principali"""
         st.header("📊 Statistiche Base")
@@ -173,9 +215,7 @@ class LuxuryRetailDashboard:
             
         except Exception as e:
             st.error(f"Errore nell'analisi prodotti: {str(e)}")
-            import traceback
-            st.error(traceback.format_exc())
-        
+            
     def render_insights(self, analyzer):
         """Render degli insights di business"""
         st.header("💡 Business Insights")
@@ -216,23 +256,37 @@ class LuxuryRetailDashboard:
         """Main function della dashboard"""
         self.render_header()
         
-        # File upload
-        uploaded_file = st.file_uploader(
-            "Carica il file Excel (Online Retail II dataset)",
-            type=['xlsx']
+        # Opzioni per il caricamento dei dati
+        data_option = st.radio(
+            "Scegli la fonte dei dati:",
+            ["Usa dataset di default", "Carica file personalizzato"]
         )
         
-        if uploaded_file is not None:
+        # Gestione caricamento dati
+        if data_option == "Usa dataset di default":
+            if not st.session_state.data_loaded and st.button("Carica dataset di default"):
+                self.load_default_dataset()
+        else:
+            uploaded_file = st.file_uploader(
+                "Carica il file Excel (Online Retail II dataset)",
+                type=['xlsx']
+            )
+            if uploaded_file is not None and not st.session_state.data_loaded:
+                self.load_custom_dataset(uploaded_file)
+                
+        # Clear data button
+        if st.session_state.data_loaded:
+            if st.button("Cancella dati caricati"):
+                st.session_state.df = None
+                st.session_state.customer_stats = None
+                st.session_state.data_loaded = False
+                st.experimental_rerun()
+        
+        # Procedi con l'analisi se abbiamo i dati
+        if st.session_state.data_loaded:
             try:
-                # Load e process data
-                df = pd.read_excel(uploaded_file)
-                st.success("File caricato con successo!")
-                
-                analyzer = LuxuryRetailAnalyzer(df)
-                df, customer_stats = analyzer.process_data()
-                
                 # Render components
-                self.render_kpis(df, customer_stats)
+                self.render_kpis(st.session_state.df, st.session_state.customer_stats)
                 
                 # Tabs per le analisi
                 tab1, tab2, tab3 = st.tabs([
@@ -242,19 +296,21 @@ class LuxuryRetailDashboard:
                 ])
                 
                 with tab1:
-                    self.render_customer_analysis(customer_stats, df)
+                    self.render_customer_analysis(st.session_state.customer_stats, st.session_state.df)
                     
                 with tab2:
-                    self.render_product_analysis(df)
+                    self.render_product_analysis(st.session_state.df)
                     
                 with tab3:
+                    # Creiamo un analyzer temporaneo per gli insights
+                    analyzer = LuxuryRetailAnalyzer(st.session_state.df)
+                    analyzer.df = st.session_state.df
+                    analyzer.customer_stats = st.session_state.customer_stats
                     self.render_insights(analyzer)
                     
             except Exception as e:
-                st.error(f"Si è verificato un errore: {str(e)}")
-        else:
-            st.info("👆 Carica un file Excel per iniziare l'analisi")
-            
+                st.error(f"Si è verificato un errore nell'analisi: {str(e)}")
+        
         # Render sidebar
         self.render_sidebar()
 
