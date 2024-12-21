@@ -428,11 +428,24 @@ class LuxuryRetailDashboard:
                 yaxis_type="log"
             )
             st.plotly_chart(fig_violin, use_container_width=True)
+    
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
         st.header("🛍️ Analisi Prodotti")
         
-        # Aggiungo la spiegazione della segmentazione
+        # Definiamo l'ordine dei segmenti una volta sola
+        segment_order = ['Budget', 'Regular', 'Premium', 'Luxury']
+        
+        # Creiamo una copia del dataframe e settiamo categorical
+        df = df.copy()
+        df['StockCode'] = df['StockCode'].astype(str)
+        df['price_segment'] = pd.Categorical(
+            df['price_segment'],
+            categories=segment_order,
+            ordered=True
+        )
+        
+        # Spiegazione della segmentazione
         st.markdown("""
         ### Segmentazione dei Prodotti
 
@@ -445,11 +458,8 @@ class LuxuryRetailDashboard:
         Questa segmentazione è relativa alla distribuzione dei prezzi nel dataset, garantendo una suddivisione bilanciata 
         dei prodotti tra i segmenti (~25% in ogni segmento) e adattandosi automaticamente al range di prezzi presente nei dati.
         """)
+        
         try:
-            # Assicuriamoci che StockCode sia una stringa
-            df = df.copy()
-            df['StockCode'] = df['StockCode'].astype(str)
-            
             # Performance per categoria
             col1, col2 = st.columns(2)
             
@@ -476,12 +486,10 @@ class LuxuryRetailDashboard:
                     xaxis_title="Segmento",
                     yaxis_title="Revenue (€)",
                     showlegend=False,
-                    height=400,
-                    xaxis={'categoryorder':'total descending'}  # Ordina le barre per valore decrescente
+                    height=400
                 )
-
                 st.plotly_chart(fig_cat, use_container_width=True)
-                
+                    
             with col2:
                 # Trend stagionale
                 seasonal = df.groupby('season')['Total_Value'].sum()
@@ -493,7 +501,7 @@ class LuxuryRetailDashboard:
                 )
                 st.plotly_chart(fig_seasonal, use_container_width=True)
 
-            # Aggiungo l'interpretazione del trend stagionale
+            # Interpretazione del trend stagionale
             st.markdown("""
             ### Interpretazione del Trend Stagionale
 
@@ -507,11 +515,9 @@ class LuxuryRetailDashboard:
             - La possibilità di capitalizzare ulteriormente sul picco autunnale
             - La presenza di una base stabile di vendite durante Inverno e Primavera
             """)
-
+                
             # Top prodotti
             st.subheader("📈 Top Prodotti")
-            
-            # Aggreghiamo prima i dati
             top_products = (df.groupby('StockCode').agg({
                 'Description': 'first',
                 'price_segment': 'first',
@@ -522,7 +528,6 @@ class LuxuryRetailDashboard:
             .head(10)
             .reset_index())
             
-            # Formatta la tabella
             formatted_products = pd.DataFrame({
                 'Codice': top_products['StockCode'],
                 'Descrizione': top_products['Description'],
@@ -533,24 +538,18 @@ class LuxuryRetailDashboard:
             
             st.dataframe(formatted_products, use_container_width=True)
             
-
-               # Nuova sezione di analisi dei segmenti di prezzo
+            # Caratteristiche dei Segmenti di Prezzo
             st.header("Analisi Dettagliata dei Segmenti di Prezzo")
-            
-            # 1. Caratteristiche dei Segmenti di Prezzo
             st.subheader("Caratteristiche dei Segmenti di Prezzo")
             
-            # Calcoliamo le statistiche per segmento
             price_stats = df.groupby('price_segment').agg({
                 'Price': ['min', 'max', 'mean', 'median', 'std'],
                 'StockCode': 'nunique'
             }).round(2)
             
-            # Calcoliamo la % di SKU
             total_sku = price_stats[('StockCode', 'nunique')].sum()
             price_stats[('StockCode', '%_SKU')] = (price_stats[('StockCode', 'nunique')] / total_sku * 100).round(1)
             
-            # Formattazione per visualizzazione
             price_stats_display = pd.DataFrame({
                 'Range Prezzo': [f"€{row[('Price', 'min')]:,.2f} - €{row[('Price', 'max')]:,.2f}" 
                                 for idx, row in price_stats.iterrows()],
@@ -563,7 +562,7 @@ class LuxuryRetailDashboard:
             
             st.dataframe(price_stats_display, use_container_width=True)
             
-            # 2. Performance di Vendita per Segmento
+            # Performance di Vendita per Segmento
             st.subheader("Performance di Vendita per Segmento")
             
             segment_perf = df.groupby('price_segment').agg({
@@ -572,12 +571,10 @@ class LuxuryRetailDashboard:
                 'Total_Value': 'sum'
             })
             
-            # Calcoliamo le percentuali e l'AOV
             segment_perf['% Volume'] = (segment_perf['Quantity'] / segment_perf['Quantity'].sum() * 100).round(1)
             segment_perf['% Valore'] = (segment_perf['Total_Value'] / segment_perf['Total_Value'].sum() * 100).round(1)
             segment_perf['AOV'] = (segment_perf['Total_Value'] / segment_perf['Invoice']).round(2)
             
-            # Formattazione per visualizzazione
             perf_display = pd.DataFrame({
                 'N. Transazioni': segment_perf['Invoice'].map('{:,.0f}'.format),
                 'Volume Totale': segment_perf['Quantity'].map('{:,.0f}'.format),
@@ -589,7 +586,7 @@ class LuxuryRetailDashboard:
             
             st.dataframe(perf_display, use_container_width=True)
             
-            # 3. Analisi Statistica
+            # Analisi Statistica
             st.subheader("Analisi Statistica delle Differenze tra Segmenti")
             
             # Test per valore
@@ -626,16 +623,15 @@ class LuxuryRetailDashboard:
             
             st.table(volume_test)
             
-            # Commento interpretativo
             st.markdown("""
             **Interpretazione dei Test Statistici:**
             - Il test di Kruskal-Wallis verifica se esistono differenze significative tra i segmenti
             - Un p-value < 0.05 indica differenze statisticamente significative
             - I test sono stati eseguiti sia sul valore delle transazioni che sul volume
             """)
+                
         except Exception as e:
-            st.error(f"Errore nell'analisi prodotti: {str(e)}")
-            
+            st.error(f"Errore nell'analisi prodotti: {str(e)}")      
     def render_insights(self, analyzer):
         """Render degli insights di business"""
         st.header("💡 Business Insights")
