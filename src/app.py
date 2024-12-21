@@ -7,6 +7,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from analyzer import LuxuryRetailAnalyzer
+import numpy as np
+from plotly.subplots import make_subplots
 import os
 from scipy import stats
 
@@ -429,6 +431,172 @@ class LuxuryRetailDashboard:
             )
             st.plotly_chart(fig_violin, use_container_width=True)
     
+    def render_advanced_product_analysis(self, df, customer_stats):
+        """
+        Render dell'analisi prodotti avanzata con approfondimenti dettagliati.
+        
+        Args:
+            df (pd.DataFrame): DataFrame con dati vendite
+            customer_stats (pd.DataFrame): DataFrame con statistiche clienti
+        """
+        st.header("🔍 Analisi Prodotti Avanzata")
+        
+        # 1. Stagionalità per segmento di prodotto
+        st.subheader("1. Stagionalità per Segmento di Prezzo")
+        
+        seasonal_segment_perf = df.groupby(['price_segment', 'season'])['Total_Value'].agg([
+            'sum', 
+            'mean', 
+            'count'
+        ]).reset_index()
+        
+        # Grafico a heatmap della stagionalità
+        pivot_seasonal = seasonal_segment_perf.pivot(
+            index='price_segment', 
+            columns='season', 
+            values='sum'
+        )
+        
+        fig_seasonal = px.imshow(
+            pivot_seasonal, 
+            labels=dict(x="Stagione", y="Segmento Prezzo", color="Revenue (€)"),
+            title="Revenue per Segmento e Stagione"
+        )
+        st.plotly_chart(fig_seasonal, use_container_width=True)
+        
+        # Analisi statistica delle differenze stagionali
+        st.markdown("**Test Statistico Stagionalità**")
+        seasonal_tests = []
+        for segment in df['price_segment'].unique():
+            segment_df = df[df['price_segment'] == segment]
+            seasonal_groups = [
+                group['Total_Value'].values 
+                for name, group in segment_df.groupby('season')
+            ]
+            
+            if len(seasonal_groups) > 1:
+                h_stat, p_val = stats.kruskal(*seasonal_groups)
+                seasonal_tests.append({
+                    'Segmento': segment,
+                    'H-statistic': h_stat,
+                    'p-value': p_val,
+                    'Significativo': 'Sì' if p_val < 0.05 else 'No'
+                })
+        
+        st.dataframe(pd.DataFrame(seasonal_tests), use_container_width=True)
+        
+        # 2. Concentrazione delle vendite
+        st.subheader("2. Concentrazione delle Vendite per Segmento")
+        
+        # Calcolo della concentrazione usando la curva di Lorenz
+        def calculate_lorenz_curve(values):
+            """Calcola i punti per la curva di Lorenz"""
+            sorted_values = np.sort(values)
+            cumx = np.cumsum(sorted_values)
+            sumy = cumx / cumx[-1]
+            sumx = np.arange(1, len(sumy) + 1) / len(sumy)
+            return sumx, sumy
+        
+        concentration_data = []
+        lorenz_figs = make_subplots(
+            rows=2, cols=2, 
+            subplot_titles=df['price_segment'].unique(),
+            vertical_spacing=0.1,
+            horizontal_spacing=0.05
+        )
+        
+        for i, segment in enumerate(df['price_segment'].unique(), 1):
+            segment_df = df[df['price_segment'] == segment]
+            
+            # Raggruppa per prodotto
+            product_sales = segment_df.groupby('StockCode')['Total_Value'].sum().sort_values(ascending=False)
+            
+            # Calcola concentrazione
+            total_sales = product_sales.sum()
+            top_5_pct = product_sales.head(int(len(product_sales) * 0.05)).sum() / total_sales * 100
+            
+            # Curva di Lorenz
+            lorenz_x, lorenz_y = calculate_lorenz_curve(product_sales.values)
+            
+            # Aggiungi alla figura
+            row = (i-1) // 2 + 1
+            col = (i-1) % 2 + 1
+            
+            lorenz_figs.add_trace(
+                go.Scatter(x=lorenz_x, y=lorenz_y, name=segment, mode='lines'),
+                row=row, col=col
+            )
+            lorenz_figs.add_trace(
+                go.Scatter(x=[0, 1], y=[0, 1], mode='lines', line=dict(color='red', dash='dash')),
+                row=row, col=col
+            )
+            
+            concentration_data.append({
+                'Segmento': segment,
+                'Top 5% Prodotti Generano': f'{top_5_pct:.1f}%',
+                'N. Prodotti Totali': len(product_sales),
+                'N. Prodotti Top 5%': int(len(product_sales) * 0.05)
+            })
+        
+        lorenz_figs.update_layout(
+            title="Curve di Concentrazione per Segmento",
+            height=800
+        )
+        st.plotly_chart(lorenz_figs, use_container_width=True)
+        
+        st.dataframe(pd.DataFrame(concentration_data), use_container_width=True)
+        
+        # 3. Cross-selling tra segmenti
+        st.subheader("3. Cross-Selling tra Segmenti")
+        
+        # Identifica clienti che acquistano in più segmenti
+        client_segment_purchases = df.groupby('Customer ID')['price_segment'].nunique()
+        multi_segment_clients = client_segment_purchases[client_segment_purchases > 1]
+        
+        # Matrice di transizione tra segmenti
+        cross_sell_matrix = pd.crosstab(
+            df[df['Customer ID'].isin(multi_segment_clients.index)]['Customer ID'].map(
+                df.groupby('Customer ID')['price_segment'].first()
+            ),
+            df[df['Customer ID'].isin(multi_segment_clients.index)]['price_segment'],
+            normalize='index'
+        ) * 100
+        
+        # Heatmap cross-selling
+        fig_cross_sell = px.imshow(
+            cross_sell_matrix, 
+            labels=dict(x="Segmento Successivo", y="Segmento Iniziale", color="% Clienti"),
+            title="Matrice Cross-Selling tra Segmenti"
+        )
+        st.plotly_chart(fig_cross_sell, use_container_width=True)
+        
+        # 4. Customer Segment Affinity
+        st.subheader("4. Affinità tra Segmenti Clienti e Prodotti")
+        
+        # Calcola la distribuzione dei segmenti prodotti per ogni segmento cliente
+        affinity_matrix = df.groupby([
+            df.merge(
+                customer_stats[['customer_segment']], 
+                left_on='Customer ID', 
+                right_index=True
+            )['customer_segment'], 
+            'price_segment'
+        ])['Total_Value'].sum().unstack(fill_value=0)
+        
+        # Normalizza per percentuale
+        affinity_matrix_pct = affinity_matrix.div(affinity_matrix.sum(axis=1), axis=0) * 100
+        
+        # Heatmap affinità
+        fig_affinity = px.imshow(
+            affinity_matrix_pct, 
+            labels=dict(x="Segmento Prodotto", y="Segmento Cliente", color="% Vendite"),
+            title="Affinità tra Segmenti Clienti e Prodotti"
+        )
+        st.plotly_chart(fig_affinity, use_container_width=True)
+        
+        # Tabella riassuntiva
+        st.dataframe(affinity_matrix_pct.round(1), use_container_width=True)
+        
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
         st.header("🛍️ Analisi Prodotti")
@@ -729,15 +897,15 @@ class LuxuryRetailDashboard:
                 # Render components
                 self.render_kpis(st.session_state.df, st.session_state.customer_stats)
                 
-                # Tabs per le analisi
-                tab1, tab2, tab3, tab4, tab5 = st.tabs([
+                            # Tabs per le analisi
+                tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
                     "👥 Analisi Cliente",
                     "📊 Analisi RFM",
                     "🎯 Analisi Segmenti",
                     "🛍️ Analisi Prodotti",
+                    "🔍 Analisi Prodotti Avanzata",
                     "💡 Business Insights"
                 ])
-                
                 with tab1:
                     # Mantenere solo la parte iniziale dell'analisi cliente
                     # (fino a prima della sezione RFM)
@@ -753,11 +921,13 @@ class LuxuryRetailDashboard:
                     self.render_product_analysis(st.session_state.df)
                     
                 with tab5:
+                    self.render_advanced_product_analysis(st.session_state.df, st.session_state.customer_stats)
+                    
+                with tab6:
                     analyzer = LuxuryRetailAnalyzer(st.session_state.df)
                     analyzer.df = st.session_state.df
                     analyzer.customer_stats = st.session_state.customer_stats
                     self.render_insights(analyzer)
-                    
             except Exception as e:
                 st.error(f"Si è verificato un errore nell'analisi: {str(e)}")
         
