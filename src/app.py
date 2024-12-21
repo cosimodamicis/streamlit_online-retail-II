@@ -254,7 +254,7 @@ class LuxuryRetailDashboard:
         order_stats.insert(1, 'Total', segment_order_totals)
 
         # Ordino per Total decrescente e resetto l'indice
-        order_stats = order_stats.sort_values('Total', ascending=False).reset_index()
+        order_stats = order_stats.sort_values('mean', ascending=False).reset_index()
 
         # Formatto i valori monetari
         for col in ['Total', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']:
