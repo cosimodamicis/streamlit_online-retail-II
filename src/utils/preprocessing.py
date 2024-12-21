@@ -108,11 +108,11 @@ def categorize_products(df: pd.DataFrame) -> pd.DataFrame:
     def get_price_segment(price):
         if price <= price_percentiles[0.25]:
             return 'Budget'
-        elif price <= price_percentiles[0.5]:
+        elif price > price_percentiles[0.25] and price <= price_percentiles[0.5]:  # modifica qui
             return 'Regular'
-        elif price <= price_percentiles[0.75]:
+        elif price > price_percentiles[0.5] and price <= price_percentiles[0.75]:  # e qui
             return 'Premium'
-        else:
+        else:  # implicitamente price > price_percentiles[0.75]
             return 'Luxury'
             
     product_stats['price_segment'] = product_stats['Price'].apply(get_price_segment)
