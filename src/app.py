@@ -203,7 +203,7 @@ class LuxuryRetailDashboard:
             'R Score': rfm_means['r_score'].round(2),
             'F Score': rfm_means['f_score'].round(2),
             'M Score': rfm_means['m_score'].round(2),
-            'Score Totale': rfm_means.mean(axis=1).round(2)
+            'Score Medio': rfm_means.mean(axis=1).round(2)
         }).sort_values('Score Totale', ascending=False)
         
         # Versione semplice senza gradient
