@@ -577,8 +577,7 @@ class LuxuryRetailDashboard:
             price_stats[('StockCode', '%_SKU')] = (price_stats[('StockCode', 'nunique')] / total_sku * 100).round(1)
             
             price_stats_display = pd.DataFrame({
-                'Range Prezzo': [f"€{row[('Price', 'min')]:,.2f} - €{row[('Price', 'max')]:,.2f}" 
-                                for idx, row in price_stats.iterrows()],
+                
                 'Prezzo Medio': [f"€{x:,.2f}" for x in price_stats[('Price', 'mean')]],
                 'Prezzo Mediano': [f"€{x:,.2f}" for x in price_stats[('Price', 'median')]],
                 'Dev. Standard': [f"€{x:,.2f}" for x in price_stats[('Price', 'std')]],
