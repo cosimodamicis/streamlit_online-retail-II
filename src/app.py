@@ -586,82 +586,7 @@ class LuxuryRetailDashboard:
             Il segmento **Luxury** si distingue per la sua uniformità stagionale, mentre gli altri segmenti presentano variazioni significative tra stagioni. Tuttavia, tutti i segmenti seguono strettamente le tendenze generali delle vendite stagionali.
             """)
 
-        # Calcolo della concentrazione per segmento
-        st.subheader("Curve di Concentrazione per Segmento")
-
-        # Funzione per calcolare la curva di Lorenz
-        def calculate_lorenz_curve(values):
-            """Calcola i punti per la curva di Lorenz"""
-            sorted_values = np.sort(values)
-            cumx = np.cumsum(sorted_values)
-            sumy = cumx / cumx[-1]  # Normalizzazione
-            sumx = np.arange(1, len(sumy) + 1) / len(sumy)
-            return sumx, sumy
-
-        # Creazione del layout delle curve (una per segmento)
-        segments = df['price_segment'].unique()
-        lorenz_figs = make_subplots(
-            rows=2, cols=2,
-            subplot_titles=segments,
-            vertical_spacing=0.1,
-            horizontal_spacing=0.05
-        )
-
-        # Tabella di riepilogo
-        concentration_data = []
-
-        for i, segment in enumerate(segments):
-            # Filtra i dati per il segmento corrente
-            segment_df = df[df['price_segment'] == segment]
-            
-            # Raggruppa per prodotto
-            product_sales = segment_df.groupby('StockCode')['Total_Value'].sum().sort_values(ascending=False)
-            
-            # Calcolo della concentrazione
-            total_sales = product_sales.sum()
-            num_top_5_products = max(1, int(len(product_sales) * 0.05))  # Assicura almeno 1 prodotto
-            top_5_products = product_sales.head(num_top_5_products).sum()
-            top_5_pct = (top_5_products / total_sales) * 100
-            
-            # Curva di Lorenz
-            lorenz_x, lorenz_y = calculate_lorenz_curve(product_sales.values)
-            
-            # Determina la posizione nel layout della figura
-            row = (i // 2) + 1
-            col = (i % 2) + 1
-            
-            # Aggiungi tracce alla figura
-            lorenz_figs.add_trace(
-                go.Scatter(x=lorenz_x, y=lorenz_y, name=segment, mode='lines'),
-                row=row, col=col
-            )
-            lorenz_figs.add_trace(
-                go.Scatter(x=[0, 1], y=[0, 1], mode='lines', line=dict(color='red', dash='dash')),
-                row=row, col=col
-            )
-            
-             # Aggiungi i dati alla tabella
-            concentration_data.append({
-                'Segmento': segment,
-                'Top 5% Prodotti Generano': f'{top_5_pct:.1f}%',
-                'N. Prodotti Totali': len(product_sales),
-                'N. Prodotti Top 5%': num_top_5_products
-            })
-
-        # Configurazione del layout del grafico
-        lorenz_figs.update_layout(
-            title="Curve di Concentrazione per Segmento",
-            height=800,
-            showlegend=False
-        )
-
-        # Mostra il grafico
-        st.plotly_chart(lorenz_figs, use_container_width=True)
-
-        # Mostra la tabella riepilogativa
-        st.subheader("Tabella Riepilogativa della Concentrazione")
-        concentration_df = pd.DataFrame(concentration_data)
-        st.dataframe(concentration_df, use_container_width=True)
+        
 
         # Calcolo della concentrazione globale
         st.subheader("Concentrazione delle Vendite (Globale)")
@@ -729,13 +654,27 @@ class LuxuryRetailDashboard:
         concentration_global_df = pd.DataFrame(concentration_global_data)
         st.dataframe(concentration_global_df, use_container_width=True)
 
-        # Spiegazione aggiuntiva
         st.markdown("""
-        **Interpretazione della Concentrazione Globale:**
-        - La curva di Lorenz mostra come le vendite sono distribuite tra tutti i prodotti.
-        - La percentuale di vendite generate dal **top 5% dei prodotti** evidenzia quanto le vendite siano concentrate su pochi prodotti.
-        - Una curva più vicina all'angolo inferiore sinistro indica una forte concentrazione.
+        ### Interpretazione della Concentrazione delle Vendite (Globale)
+
+        #### **Curva di Lorenz**
+        - La curva di Lorenz indica una **forte concentrazione delle vendite**, con una piccola frazione di prodotti che genera la maggior parte dei ricavi.
+        - Il **44.4% delle vendite totali** è generato dal **top 5% dei prodotti**, evidenziando che circa 200 prodotti dominano il mercato.
+        - Una curva più vicina all'angolo inferiore sinistro rispetto alla diagonale rossa tratteggiata riflette questa concentrazione.
+
+        #### **Tabella Riepilogativa**
+        - **N. Prodotti Totali**: 4017 prodotti analizzati.
+        - **Top 5% Prodotti Generano**: 44.4% del revenue totale.
+        - **N. Prodotti Top 5%**: 200 prodotti.
+
+        #### **Conclusioni e Implicazioni**
+        1. **Concentrazione significativa**: Una piccola frazione di prodotti (5%) genera quasi la metà delle vendite.
+        2. **Focalizzazione strategica**:
+        - **Best-seller**: Dare priorità al mantenimento delle scorte, pricing ottimizzato e promozioni mirate.
+        - **Prodotti a bassa performance**: Valutare opportunità di riposizionamento o eliminazione.
+        3. **Monitoraggio continuo**: Tenere sotto controllo la concentrazione per identificare cambiamenti strategici o potenziali rischi.
         """)
+
 
         # 3. Cross-selling tra segmenti
         st.subheader("3. Cross-Selling tra Segmenti")
