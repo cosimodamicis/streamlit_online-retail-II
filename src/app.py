@@ -676,6 +676,8 @@ class LuxuryRetailDashboard:
         """)
 
 
+        st.write("Colonne presenti nel DataFrame:", df.columns)
+        
         # 3. Cross-Selling tra Segmenti
 
         
