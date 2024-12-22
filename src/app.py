@@ -1241,23 +1241,24 @@ class LuxuryRetailDashboard:
         # -------------------------
         # Random Forest con i migliori parametri
         # -------------------------
-        st.subheader("🌲 Random Forest Ottimizzato")
-        rf_preds = best_model.predict(X_test)
+        if st.button("Esegui Analisi Random Forest Ottimizzata"):
+            st.subheader("🌲 Random Forest Ottimizzato")
+            rf_preds = best_model.predict(X_test)
 
-        st.text("Classification Report (Random Forest Ottimizzato):")
-        st.text(classification_report(y_test, rf_preds))
+            st.text("Classification Report (Random Forest Ottimizzato):")
+            st.text(classification_report(y_test, rf_preds))
 
-        rf_accuracy = accuracy_score(y_test, rf_preds)
-        st.metric("Random Forest Accuracy (Ottimizzato)", f"{rf_accuracy * 100:.2f}%")
+            rf_accuracy = accuracy_score(y_test, rf_preds)
+            st.metric("Random Forest Accuracy (Ottimizzato)", f"{rf_accuracy * 100:.2f}%")
 
-        # Feature Importance
-        rf_feature_importance = pd.DataFrame({
-            'Feature': features.columns,
-            'Importance': best_model.feature_importances_
-        }).sort_values(by='Importance', ascending=False)
+            # Feature Importance
+            rf_feature_importance = pd.DataFrame({
+                'Feature': features.columns,
+                'Importance': best_model.feature_importances_
+            }).sort_values(by='Importance', ascending=False)
 
-        st.subheader("Importanza delle Variabili (Random Forest Ottimizzato)")
-        st.bar_chart(rf_feature_importance.set_index('Feature'))
+            st.subheader("Importanza delle Variabili (Random Forest Ottimizzato)")
+            st.bar_chart(rf_feature_importance.set_index('Feature'))
 
 
     
