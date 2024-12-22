@@ -1215,7 +1215,7 @@ class LuxuryRetailDashboard:
                 self.render_kpis(st.session_state.df, st.session_state.customer_stats)
                 
                             # Tabs per le analisi
-                tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+                tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
                     "👥 Analisi Cliente",
                     "📊 Analisi RFM",
                     "🎯 Analisi Segmenti",
