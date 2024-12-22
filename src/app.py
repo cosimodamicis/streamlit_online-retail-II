@@ -46,19 +46,19 @@ class LuxuryRetailDashboard:
         """Carica il dataset di default dalla cartella data"""
         try:
             default_path = os.path.join('data', 'online_retail_II.xlsx')
-            
-            # Consolidamento dei fogli Excel
-            df = consolidate_excel_sheets(default_path)  # Usa la funzione di preprocessing
-            
-            # Analizza e processa il dataset consolidato
+
+            # Usa la funzione per consolidare i dati da tutti i fogli
+            df = consolidate_excel_sheets(default_path)
+
+            # Passa il DataFrame consolidato all'analizzatore
             analyzer = LuxuryRetailAnalyzer(df)
             df, customer_stats = analyzer.process_data()
-            
+
             # Salva in session state
             st.session_state.df = df
             st.session_state.customer_stats = customer_stats
             st.session_state.data_loaded = True
-            
+
             st.success("Dataset di default consolidato e caricato con successo!")
         except Exception as e:
             st.error(f"Errore nel caricamento del dataset di default: {str(e)}")
