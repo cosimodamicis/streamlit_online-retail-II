@@ -1100,11 +1100,22 @@ class LuxuryRetailDashboard:
     def render_retention_analysis(self, customer_stats):
         st.header("🔄 Analisi Retention")
 
+
+        st.write("Distribuzione con tutti i clienti attivi nel 2011:")
+        st.bar_chart(customer_stats['is_retained'].value_counts())
+
+        st.write("Distribuzione escludendo i nuovi clienti nel 2011:")
+        retained_excluding_new = (
+            (customer_stats['last_purchase'].dt.year == 2011) &
+            (customer_stats['first_purchase'].dt.year < 2011)
+        )
+        st.bar_chart(retained_excluding_new.value_counts())
+
         # Creazione del target `is_retained` con criterio migliorato
-        customer_stats['is_retained'] = (
-            (customer_stats['last_purchase'] > pd.Timestamp.now() - pd.Timedelta(days=180)) &
-            (customer_stats['num_orders'] > 3)
-        ).astype(int)
+        # Per la distribuzione
+        customer_stats['is_retained'] = customer_stats['last_purchase'].dt.year == 2011
+        st.write("Distribuzione Target (booleano):")
+        st.bar_chart(customer_stats['is_retained'].value_counts())
 
         # Controlla la distribuzione della variabile target
         st.write("Distribuzione Target:")
@@ -1112,7 +1123,8 @@ class LuxuryRetailDashboard:
 
         # Selezione delle feature e del target
         features = customer_stats[['recency', 'frequency', 'total_spend', 'avg_order_value']]
-        target = customer_stats['is_retained']
+        # Per il target del modello (converti a int)
+        target = customer_stats['is_retained'].astype(int)
 
         # Verifica statistiche delle feature
         st.write("Statistiche delle Variabili di Input:")
