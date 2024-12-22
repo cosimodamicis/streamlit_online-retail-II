@@ -1107,7 +1107,6 @@ class LuxuryRetailDashboard:
         st.header("🔄 Analisi Retention")
 
         # Creazione del target `is_retained` con criterio migliorato
-        # Per la distribuzione
         customer_stats['is_retained'] = customer_stats['last_purchase'].dt.year == 2011
         st.write("Distribuzione con tutti i clienti attivi nel 2011:")
         st.bar_chart(customer_stats['is_retained'].value_counts())
@@ -1119,17 +1118,8 @@ class LuxuryRetailDashboard:
         )
         st.bar_chart(retained_excluding_new.value_counts())
 
-        
-        st.write("Distribuzione Target (booleano):")
-        st.bar_chart(customer_stats['is_retained'].value_counts())
-
-        # Controlla la distribuzione della variabile target
-        st.write("Distribuzione Target:")
-        st.bar_chart(customer_stats['is_retained'].value_counts())
-
         # Selezione delle feature e del target
         features = customer_stats[['recency', 'frequency', 'total_spend', 'avg_order_value']]
-        # Per il target del modello (converti a int)
         target = customer_stats['is_retained'].astype(int)
 
         # Verifica statistiche delle feature
@@ -1139,36 +1129,56 @@ class LuxuryRetailDashboard:
         # Divisione train/test
         X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
 
-        # Decision Tree Model con profondità maggiore
+        # -------------------------
+        # Decision Tree Model
+        # -------------------------
+        st.subheader("📉 Decision Tree")
         dt_model = DecisionTreeClassifier(max_depth=10, random_state=42)
         dt_model.fit(X_train, y_train)
+        dt_preds = dt_model.predict(X_test)
 
-        # Predizioni
-        y_pred = dt_model.predict(X_test)
+        st.text("Classification Report (Decision Tree):")
+        st.text(classification_report(y_test, dt_preds))
 
-        # Visualizzazione dei risultati
-        st.subheader("Performance del Modello")
-        st.text("Classification Report:")
-        st.text(classification_report(y_test, y_pred))
-
-        # Accuracy
-        accuracy = accuracy_score(y_test, y_pred)
-        st.metric("Accuracy", f"{accuracy * 100:.2f}%")
+        dt_accuracy = accuracy_score(y_test, dt_preds)
+        st.metric("Decision Tree Accuracy", f"{dt_accuracy * 100:.2f}%")
 
         # Visualizzazione dell'albero decisionale
-        st.subheader("Albero Decisionale")
         fig, ax = plt.subplots(figsize=(12, 8))
         plot_tree(dt_model, feature_names=features.columns, class_names=['Non Retained', 'Retained'], filled=True, ax=ax)
         st.pyplot(fig)
 
-        # Insight sulle feature importance
-        st.subheader("Importanza delle Variabili")
-        feature_importance = pd.DataFrame({
+        # Feature Importance (Decision Tree)
+        dt_feature_importance = pd.DataFrame({
             'Feature': features.columns,
             'Importance': dt_model.feature_importances_
         }).sort_values(by='Importance', ascending=False)
 
-        st.bar_chart(feature_importance.set_index('Feature'))
+        st.bar_chart(dt_feature_importance.set_index('Feature'))
+
+        # -------------------------
+        # Random Forest Model
+        # -------------------------
+        st.subheader("🌲 Random Forest")
+        rf_model = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
+        rf_model.fit(X_train, y_train)
+        rf_preds = rf_model.predict(X_test)
+
+        st.text("Classification Report (Random Forest):")
+        st.text(classification_report(y_test, rf_preds))
+
+        rf_accuracy = accuracy_score(y_test, rf_preds)
+        st.metric("Random Forest Accuracy", f"{rf_accuracy * 100:.2f}%")
+
+        # Feature Importance (Random Forest)
+        rf_feature_importance = pd.DataFrame({
+            'Feature': features.columns,
+            'Importance': rf_model.feature_importances_
+        }).sort_values(by='Importance', ascending=False)
+
+        st.subheader("Importanza delle Variabili (Random Forest)")
+        st.bar_chart(rf_feature_importance.set_index('Feature'))
+
 
     
     def render_insights(self, analyzer):
