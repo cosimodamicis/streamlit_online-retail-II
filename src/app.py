@@ -1103,7 +1103,7 @@ class LuxuryRetailDashboard:
         # Creazione del target `is_retained` con criterio migliorato
         customer_stats['is_retained'] = (
             (customer_stats['last_purchase'] > pd.Timestamp.now() - pd.Timedelta(days=180)) &
-            (customer_stats['num_orders'] > 1)
+            (customer_stats['num_orders'] > 3)
         ).astype(int)
 
         # Controlla la distribuzione della variabile target
