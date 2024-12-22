@@ -1218,7 +1218,19 @@ class LuxuryRetailDashboard:
         st.subheader("Importanza delle Variabili (Random Forest)")
         st.bar_chart(rf_feature_importance.set_index('Feature'))
 
-            # -------------------------
+        # PDP per recency e frequency
+        st.subheader("📊 Partial Dependence Plots (Random Forest)")
+        pdp_features = ['recency', 'frequency', 'total_spend']
+        
+        # Plot PDP
+        fig, ax = plt.subplots(figsize=(10, 6))
+        PartialDependenceDisplay.from_estimator(
+            rf_model, X_train, pdp_features, ax=ax
+        )
+        plt.title('Partial Dependence Plots (Random Forest)')
+        st.pyplot(fig)
+
+        # -------------------------
         # Ottimizzazione della Random Forest con GridSearchCV
         # -------------------------
         st.subheader("🌲 Ottimizzazione Random Forest")
