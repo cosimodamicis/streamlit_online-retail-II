@@ -91,6 +91,26 @@ def create_customer_features(df: pd.DataFrame) -> pd.DataFrame:
     customer_stats['customer_segment'] = customer_stats.apply(get_segment, axis=1)
     return customer_stats
 
+def consolidate_excel_sheets(file_path: str) -> pd.DataFrame:
+    """
+    Legge tutti i fogli di un file Excel e li consolida in un unico DataFrame.
+    
+    Args:
+        file_path (str): Percorso del file Excel.
+    
+    Returns:
+        pd.DataFrame: DataFrame consolidato con i dati di tutti i fogli.
+    """
+    try:
+        # Leggi tutti i fogli
+        sheets = pd.read_excel(file_path, sheet_name=None)  # Legge tutti i fogli come un dizionario {sheet_name: DataFrame}
+        
+        # Consolida i fogli in un unico DataFrame
+        consolidated_df = pd.concat(sheets.values(), ignore_index=True)
+        return consolidated_df
+    except Exception as e:
+        raise ValueError(f"Errore nel consolidamento dei fogli Excel: {str(e)}")
+    
 def categorize_products(df: pd.DataFrame) -> pd.DataFrame:
     """
     Categorizza prodotti in segmenti di prezzo.

@@ -17,6 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 import matplotlib.pyplot as plt
 
+from utils.preprocessing import consolidate_excel_sheets
 
 
 class LuxuryRetailDashboard:
@@ -45,7 +46,11 @@ class LuxuryRetailDashboard:
         """Carica il dataset di default dalla cartella data"""
         try:
             default_path = os.path.join('data', 'online_retail_II.xlsx')
-            df = pd.read_excel(default_path)
+            
+            # Consolidamento dei fogli Excel
+            df = consolidate_excel_sheets(default_path)  # Usa la funzione di preprocessing
+            
+            # Analizza e processa il dataset consolidato
             analyzer = LuxuryRetailAnalyzer(df)
             df, customer_stats = analyzer.process_data()
             
@@ -54,9 +59,10 @@ class LuxuryRetailDashboard:
             st.session_state.customer_stats = customer_stats
             st.session_state.data_loaded = True
             
-            st.success("Dataset di default caricato con successo!")
+            st.success("Dataset di default consolidato e caricato con successo!")
         except Exception as e:
             st.error(f"Errore nel caricamento del dataset di default: {str(e)}")
+
             
     def load_custom_dataset(self, uploaded_file):
         """Carica il dataset da file caricato"""
