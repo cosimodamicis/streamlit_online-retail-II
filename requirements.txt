@@ -42,6 +42,8 @@ markdown-it-py==3.0.0
     # via rich
 markupsafe==3.0.2
     # via jinja2
+matplotlib==3.10.0
+    # via manual adding
 mdurl==0.1.2
     # via markdown-it-py
 narwhals==1.19.0
