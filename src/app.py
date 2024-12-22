@@ -677,6 +677,28 @@ class LuxuryRetailDashboard:
 
 
         # 3. Cross-Selling tra Segmenti
+
+        
+        # Ordinare gli acquisti nel tempo
+        df = df.sort_values(by=['CustomerID', 'InvoiceDate'])
+
+        # Identificare il segmento iniziale per ogni cliente
+        df['initial_segment'] = df.groupby('CustomerID')['price_segment'].transform('first')
+
+        # Identificare tutti i segmenti successivi per ogni cliente
+        df['next_segment'] = df['price_segment']
+
+        # Creare una matrice di transizione
+        cross_selling_matrix = df.groupby(['initial_segment', 'next_segment'])['CustomerID'].nunique()
+        cross_selling_matrix = cross_selling_matrix.unstack(fill_value=0)
+
+        # Calcolare le percentuali per ogni segmento iniziale
+        cross_selling_percentages = (cross_selling_matrix.T / cross_selling_matrix.sum(axis=1)).T * 100
+
+        # Visualizzare i risultati
+        st.dataframe(cross_selling_percentages)
+
+
         st.subheader("3. Cross-Selling tra Segmenti")
 
         # Calcolo della matrice di transizione cross-selling
