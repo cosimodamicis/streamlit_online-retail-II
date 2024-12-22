@@ -1135,7 +1135,7 @@ class LuxuryRetailDashboard:
         # Decision Tree Model
         # -------------------------
         st.subheader("📉 Decision Tree")
-        dt_model = DecisionTreeClassifier(max_depth=10, random_state=42)
+        dt_model = DecisionTreeClassifier(max_depth=3, random_state=42)
         dt_model.fit(X_train, y_train)
         dt_preds = dt_model.predict(X_test)
 
