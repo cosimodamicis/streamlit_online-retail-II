@@ -139,33 +139,16 @@ class LuxuryRetailDashboard:
         col1, col2 = st.columns(2)
         
         with col1:
-            fig = go.Figure()
-    
-            for segment in customer_stats['customer_segment'].unique():
-                segment_data = customer_stats[customer_stats['customer_segment'] == segment]['total_spend']
-                
-                fig.add_trace(go.Histogram(
-                    x=segment_data,
-                    name=segment,
-                    marker_color=COLORS.get(segment, COLORS['primary']),
-                    opacity=0.7,
-                ))
-            
-            fig.update_layout(
-                title="Distribuzione Customer Lifetime Value per Segmento (Scala Logaritmica)",
-                xaxis=dict(
-                    title="Lifetime Value (€)",
-                    type="log"  # Imposta la scala logaritmica per l'asse X
-                ),
-                yaxis=dict(
-                    title="Numero Clienti"
-                ),
-                barmode='overlay',
-                showlegend=True,
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            fig_value = px.histogram(
+                customer_stats,
+                x='total_spend',
+                nbins=50,
+                title="Distribuzione Customer Value",
+                labels={'total_spend': 'Valore Totale (€)', 'count': 'Numero Clienti (log)'}
             )
-            
-            return fig
+            # Aggiungi scala logaritmica per l'asse Y
+            fig_value.update_layout(yaxis_type="log", xaxis_type="log")
+            st.plotly_chart(fig_value, use_container_width=True)
             
         with col2:
             # Average Order Value by Segment
