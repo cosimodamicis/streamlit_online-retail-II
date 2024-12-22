@@ -218,17 +218,22 @@ class LuxuryRetailAnalyzer:
             'priority': 'Media'
         })
         
-        # 3. Product Mix
-        category_margins = self.df.groupby('price_segment')['Total_Value'].mean()
-        
+        # 3. Concentrazione delle vendite per segmento
+        segment_revenue = self.df.groupby('price_segment')['Total_Value'].sum()
+        total_revenue = segment_revenue.sum()
+        segment_percentage = (segment_revenue / total_revenue) * 100
+
+        # Identifica il segmento dominante
+        top_segment = segment_percentage.idxmax()
+        top_segment_share = segment_percentage[top_segment]
+
         insights.append({
-            'title': 'Product Mix Strategy',
-            'finding': f'Margine {(category_margins["Luxury"]/category_margins["Regular"]-1)*100:.1f}% superiore nel segmento Luxury',
-            'action': 'Espandere assortimento Luxury',
-            'impact': '+10% margine medio',
+            'title': 'Dominanza del Segmento di Prezzo',
+            'finding': f'Il segmento "{top_segment}" genera il {top_segment_share:.1f}% del ricavo totale',
+            'action': f'Concentrarsi sull’espansione del segmento "{top_segment}" per massimizzare il profitto',
+            'impact': '+15% revenue complessivo',
             'priority': 'Alta'
         })
-        
         return insights
     
     def get_visualizations(self, period: Optional[Tuple[pd.Timestamp, pd.Timestamp]] = None) -> Dict:
