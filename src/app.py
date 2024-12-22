@@ -1214,29 +1214,30 @@ class LuxuryRetailDashboard:
         # Ottimizzazione della Random Forest con GridSearchCV
         # -------------------------
         st.subheader("🌲 Ottimizzazione Random Forest")
-        param_grid = {
-            'n_estimators': [50, 100, 200],
-            'max_depth': [5, 10, 15],
-            'min_samples_split': [2, 5, 10],
-            'min_samples_leaf': [1, 2, 4]
-        }
+        if st.button("Esegui Ottimizzazione Random Forest"):
+            param_grid = {
+                'n_estimators': [50, 100, 200],
+                'max_depth': [5, 10, 15],
+                'min_samples_split': [2, 5, 10],
+                'min_samples_leaf': [1, 2, 4]
+            }
 
-        st.write("Esecuzione GridSearchCV per ottimizzare gli iperparametri...")
-        grid_search = GridSearchCV(
-            estimator=RandomForestClassifier(random_state=42),
-            param_grid=param_grid,
-            scoring='accuracy',
-            cv=3,
-            verbose=1,
-            n_jobs=-1
-        )
-        grid_search.fit(X_train, y_train)
+            st.write("Esecuzione GridSearchCV per ottimizzare gli iperparametri...")
+            grid_search = GridSearchCV(
+                estimator=RandomForestClassifier(random_state=42),
+                param_grid=param_grid,
+                scoring='accuracy',
+                cv=3,
+                verbose=1,
+                n_jobs=-1
+            )
+            grid_search.fit(X_train, y_train)
 
-        # Migliori parametri trovati
-        st.write("Migliori parametri trovati:", grid_search.best_params_)
+            # Migliori parametri trovati
+            st.write("Migliori parametri trovati:", grid_search.best_params_)
 
-        # Modello ottimizzato
-        best_model = grid_search.best_estimator_
+            # Modello ottimizzato
+            best_model = grid_search.best_estimator_
 
         # -------------------------
         # Random Forest con i migliori parametri
