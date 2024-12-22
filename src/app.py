@@ -663,7 +663,80 @@ class LuxuryRetailDashboard:
         concentration_df = pd.DataFrame(concentration_data)
         st.dataframe(concentration_df, use_container_width=True)
 
-        
+        # Calcolo della concentrazione globale
+        st.subheader("Concentrazione delle Vendite (Globale)")
+
+        # Raggruppa per prodotto e calcola le vendite totali per ciascun prodotto
+        product_sales_global = df.groupby('StockCode')['Total_Value'].sum().sort_values(ascending=False)
+
+        # Funzione per calcolare la curva di Lorenz
+        def calculate_lorenz_curve(values):
+            """Calcola i punti per la curva di Lorenz"""
+            sorted_values = np.sort(values)
+            cumx = np.cumsum(sorted_values)
+            sumy = cumx / cumx[-1]  # Normalizzazione
+            sumx = np.arange(1, len(sumy) + 1) / len(sumy)
+            return sumx, sumy
+
+        # Calcola la curva di Lorenz per tutte le vendite
+        lorenz_x, lorenz_y = calculate_lorenz_curve(product_sales_global.values)
+
+        # Calcolo del top 5% (globale)
+        total_sales_global = product_sales_global.sum()
+        num_top_5_products_global = max(1, int(len(product_sales_global) * 0.05))
+        top_5_products_global = product_sales_global.head(num_top_5_products_global).sum()
+        top_5_pct_global = (top_5_products_global / total_sales_global) * 100
+
+        # Genera il grafico della curva di Lorenz
+        fig_lorenz = go.Figure()
+
+        # Curva di Lorenz
+        fig_lorenz.add_trace(go.Scatter(
+            x=lorenz_x, 
+            y=lorenz_y, 
+            mode='lines', 
+            name='Curva di Lorenz'
+        ))
+
+        # Linea di uniformità (diagonale)
+        fig_lorenz.add_trace(go.Scatter(
+            x=[0, 1], 
+            y=[0, 1], 
+            mode='lines', 
+            line=dict(color='red', dash='dash'), 
+            name='Uniformità'
+        ))
+
+        # Configurazione del layout
+        fig_lorenz.update_layout(
+            title="Curva di Concentrazione Globale",
+            xaxis_title="Percentuale cumulativa dei Prodotti",
+            yaxis_title="Percentuale cumulativa delle Vendite",
+            showlegend=True,
+            height=500
+        )
+
+        # Mostra il grafico
+        st.plotly_chart(fig_lorenz, use_container_width=True)
+
+        # Tabella Riepilogativa
+        st.subheader("Tabella Riepilogativa della Concentrazione Globale")
+        concentration_global_data = {
+            'Metrica': ['Top 5% Prodotti Generano', 'N. Prodotti Totali', 'N. Prodotti Top 5%'],
+            'Valore': [f'{top_5_pct_global:.1f}%', len(product_sales_global), num_top_5_products_global]
+        }
+
+        concentration_global_df = pd.DataFrame(concentration_global_data)
+        st.dataframe(concentration_global_df, use_container_width=True)
+
+        # Spiegazione aggiuntiva
+        st.markdown("""
+        **Interpretazione della Concentrazione Globale:**
+        - La curva di Lorenz mostra come le vendite sono distribuite tra tutti i prodotti.
+        - La percentuale di vendite generate dal **top 5% dei prodotti** evidenzia quanto le vendite siano concentrate su pochi prodotti.
+        - Una curva più vicina all'angolo inferiore sinistro indica una forte concentrazione.
+        """)
+
         # 3. Cross-selling tra segmenti
         st.subheader("3. Cross-Selling tra Segmenti")
         
