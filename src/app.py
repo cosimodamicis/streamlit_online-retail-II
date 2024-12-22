@@ -619,7 +619,8 @@ class LuxuryRetailDashboard:
             
             # Calcolo della concentrazione
             total_sales = product_sales.sum()
-            top_5_products = product_sales.head(int(len(product_sales) * 0.05)).sum()
+            num_top_5_products = max(1, int(len(product_sales) * 0.05))  # Assicura almeno 1 prodotto
+            top_5_products = product_sales.head(num_top_5_products).sum()
             top_5_pct = (top_5_products / total_sales) * 100
             
             # Curva di Lorenz
@@ -639,12 +640,12 @@ class LuxuryRetailDashboard:
                 row=row, col=col
             )
             
-            # Aggiungi i dati alla tabella
+             # Aggiungi i dati alla tabella
             concentration_data.append({
                 'Segmento': segment,
                 'Top 5% Prodotti Generano': f'{top_5_pct:.1f}%',
                 'N. Prodotti Totali': len(product_sales),
-                'N. Prodotti Top 5%': int(len(product_sales) * 0.05)
+                'N. Prodotti Top 5%': num_top_5_products
             })
 
         # Configurazione del layout del grafico
