@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import PartialDependenceDisplay
+from sklearn.inspection import PartialDependenceDisplay
 from sklearn.metrics import ConfusionMatrixDisplay
 
 import matplotlib.pyplot as plt
