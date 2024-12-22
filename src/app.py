@@ -805,13 +805,45 @@ class LuxuryRetailDashboard:
             st.subheader("Tabella Riepilogativa dell'Affinità")
             st.dataframe(affinity_percentages)
 
-            # Interpretazione aggiuntiva
             st.markdown("""
             ### Interpretazione del Grafico e della Tabella
-            1. La heatmap mostra l'affinità tra segmenti di clienti e prodotti come percentuale delle vendite totali.
-            2. Le celle più scure indicano una maggiore affinità (percentuali più alte).
-            3. Utilizza queste informazioni per ottimizzare l'offerta e le strategie di marketing.
+
+            #### **Grafico Heatmap**
+            1. **Segmento Cliente "At Risk"**:
+            - Affinità distribuita tra i segmenti **Luxury** (31.5%) e **Regular** (25.9%).
+            - La distribuzione è equilibrata, senza una forte dominanza di un segmento specifico.
+
+            2. **Segmento Cliente "Loyal"**:
+            - Forte affinità verso prodotti **Luxury** (33.9%), seguiti da **Regular** (28.5%).
+            - I clienti fedeli mostrano un interesse sia per prodotti di fascia alta sia per quelli regolari.
+
+            3. **Segmento Cliente "Regular"**:
+            - Leggera preferenza per prodotti **Luxury** (30.9%) e **Regular** (28.1%).
+            - Questo gruppo evidenzia una moderata propensione verso prodotti di fascia più alta.
+
+            4. **Segmento Cliente "VIP"**:
+            - Netta affinità verso prodotti **Luxury** (40.7%).
+            - I VIP sono altamente focalizzati sui prodotti di lusso, con una minore propensione verso **Budget** e **Regular**.
+
+            #### **Tabella Riepilogativa**
+            1. **Segmento Luxury**:
+            - È dominante tra i clienti **VIP** (40.7%) e ha una forte affinità con i clienti **Loyal** (33.9%).
+            2. **Segmento Budget**:
+            - Attira maggiormente i clienti **At Risk** (16.8%).
+            3. **Segmento Premium**:
+            - Riceve vendite principalmente dai clienti **Loyal** (23.6%) e **Regular** (24.6%).
+            4. **Segmento Regular**:
+            - Presenta una distribuzione uniforme tra i clienti **At Risk**, **Loyal**, e **Regular** (25-28%).
+
+            #### **Conclusioni**
+            1. **VIP**:
+            - Concentrarsi sui prodotti **Luxury** con strategie di marketing personalizzate.
+            2. **At Risk**:
+            - Incentivare il segmento **Budget** con promozioni per aumentare la penetrazione.
+            3. **Loyal e Regular**:
+            - Investire in prodotti **Luxury** e **Premium** per massimizzare le vendite.
             """)
+
 
 
         
