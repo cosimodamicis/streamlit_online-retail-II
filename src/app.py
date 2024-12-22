@@ -743,8 +743,9 @@ class LuxuryRetailDashboard:
         """)
         
         # 4. Affinità tra Segmenti Clienti e Prodotti
-        # Verifica della presenza di 'customer_segment'
-        # Controllo della colonna 'Total_Spend'
+        st.subheader("4. Affinità tra Segmenti Clienti e Prodotti")
+
+        # Verifica o calcolo della colonna 'Total_Spend'
         if 'Total_Spend' not in customer_stats.columns:
             st.warning("La colonna 'Total_Spend' non è presente. La stiamo calcolando...")
 
@@ -755,56 +756,63 @@ class LuxuryRetailDashboard:
             # Unisci il calcolo al dataset customer_stats
             customer_stats = customer_stats.merge(customer_total_spend, on='Customer ID', how='left')
 
-        # Controllo della colonna 'customer_segment'
+        # Verifica o calcolo della colonna 'customer_segment'
         if 'customer_segment' not in customer_stats.columns:
             st.warning("La colonna 'customer_segment' non è presente. La stiamo ricreando...")
 
             # Crea i segmenti cliente basati su 'Total_Spend'
             customer_stats['customer_segment'] = pd.cut(
-                customer_stats['Total_Spend'],  # Sostituisci con la colonna appropriata
-                bins=[0, 500, 1000, 5000, np.inf],  # Modifica i bin se necessario
+                customer_stats['Total_Spend'],
+                bins=[0, 500, 1000, 5000, np.inf],
                 labels=['At Risk', 'Regular', 'Loyal', 'VIP']
             )
 
+        # Aggiungi 'customer_segment' a df tramite unione
+        if 'customer_segment' not in df.columns:
+            df = df.merge(customer_stats[['Customer ID', 'customer_segment']], on='Customer ID', how='left')
 
-        # Calcolo della matrice di affinità
-        affinity_matrix = df.groupby(['customer_segment', 'price_segment'])['Total_Value'].sum()
-        affinity_matrix = affinity_matrix.unstack(fill_value=0)
+        # Verifica la presenza di 'customer_segment'
+        if 'customer_segment' not in df.columns:
+            st.error("La colonna 'customer_segment' non è stata aggiunta correttamente a df.")
+        else:
+            # Calcolo della matrice di affinità
+            affinity_matrix = df.groupby(['customer_segment', 'price_segment'])['Total_Value'].sum()
+            affinity_matrix = affinity_matrix.unstack(fill_value=0)
 
-        # Calcolo delle percentuali
-        affinity_percentages = (affinity_matrix.T / affinity_matrix.sum(axis=1)).T * 100
+            # Calcolo delle percentuali
+            affinity_percentages = (affinity_matrix.T / affinity_matrix.sum(axis=1)).T * 100
 
-        # Creazione del grafico a heatmap
-        fig_affinity = px.imshow(
-            affinity_percentages,
-            labels=dict(x="Segmento Prodotto", y="Segmento Cliente", color="% Vendite"),
-            text_auto='.1f',
-            title="Affinità tra Segmenti Clienti e Prodotti",
-            color_continuous_scale="Blues"
-        )
+            # Creazione del grafico a heatmap
+            fig_affinity = px.imshow(
+                affinity_percentages,
+                labels=dict(x="Segmento Prodotto", y="Segmento Cliente", color="% Vendite"),
+                text_auto='.1f',
+                title="Affinità tra Segmenti Clienti e Prodotti",
+                color_continuous_scale="Blues"
+            )
 
-        # Configurazione del layout
-        fig_affinity.update_layout(
-            xaxis_title="Segmento Prodotto",
-            yaxis_title="Segmento Cliente",
-            font=dict(size=12),
-            coloraxis_colorbar=dict(title="% Vendite")
-        )
+            fig_affinity.update_layout(
+                xaxis_title="Segmento Prodotto",
+                yaxis_title="Segmento Cliente",
+                font=dict(size=12),
+                coloraxis_colorbar=dict(title="% Vendite")
+            )
 
-        # Mostra il grafico
-        st.plotly_chart(fig_affinity, use_container_width=True)
+            # Mostra il grafico
+            st.plotly_chart(fig_affinity, use_container_width=True)
 
-        # Tabella Riepilogativa
-        st.subheader("Tabella Riepilogativa dell'Affinità")
-        st.dataframe(affinity_percentages)
+            # Tabella riepilogativa
+            st.subheader("Tabella Riepilogativa dell'Affinità")
+            st.dataframe(affinity_percentages)
 
-        # Interpretazione aggiuntiva
-        st.markdown("""
-        ### Interpretazione del Grafico e della Tabella
-        1. La heatmap mostra l'affinità tra segmenti di clienti e prodotti come percentuale delle vendite totali.
-        2. Le celle più scure indicano una maggiore affinità (percentuali più alte).
-        3. Utilizza queste informazioni per ottimizzare l'offerta e le strategie di marketing.
-        """)
+            # Interpretazione aggiuntiva
+            st.markdown("""
+            ### Interpretazione del Grafico e della Tabella
+            1. La heatmap mostra l'affinità tra segmenti di clienti e prodotti come percentuale delle vendite totali.
+            2. Le celle più scure indicano una maggiore affinità (percentuali più alte).
+            3. Utilizza queste informazioni per ottimizzare l'offerta e le strategie di marketing.
+            """)
+
 
         
     def render_product_analysis(self, df):
