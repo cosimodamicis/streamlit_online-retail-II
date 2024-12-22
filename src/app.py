@@ -106,7 +106,7 @@ class LuxuryRetailDashboard:
     def render_customer_analysis(self, customer_stats, df):
         """Render dell'analisi clienti"""
         st.header("👥 Analisi Cliente")
-        
+        st.write("Colonne presenti nel DataFrame:", df.columns)
         # Segmentazione clienti
         segment_dist = customer_stats['customer_segment'].value_counts().reset_index()
         segment_dist.columns = ['Segmento', 'Numero Clienti']
@@ -676,7 +676,7 @@ class LuxuryRetailDashboard:
         """)
 
 
-        st.write("Colonne presenti nel DataFrame:", df.columns)
+        
 
         # 3. Cross-Selling tra Segmenti
 
@@ -697,8 +697,7 @@ class LuxuryRetailDashboard:
         # Calcolare le percentuali per ogni segmento iniziale
         cross_selling_percentages = (cross_selling_matrix.T / cross_selling_matrix.sum(axis=1)).T * 100
 
-        # Visualizzare i risultati
-        st.dataframe(cross_selling_percentages)
+        
 
 
         st.subheader("3. Cross-Selling tra Segmenti")
