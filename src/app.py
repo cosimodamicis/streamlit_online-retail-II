@@ -742,32 +742,59 @@ class LuxuryRetailDashboard:
         - Le celle scure indicano percentuali più alte, cioè una maggiore incidenza di cross-selling.
         """)
         
-        # 4. Customer Segment Affinity
+        # 4. Affinità tra Segmenti Clienti e Prodotti
         st.subheader("4. Affinità tra Segmenti Clienti e Prodotti")
-        
-        # Calcola la distribuzione dei segmenti prodotti per ogni segmento cliente
-        affinity_matrix = df.groupby([
-            df.merge(
-                customer_stats[['customer_segment']], 
-                left_on='Customer ID', 
-                right_index=True
-            )['customer_segment'], 
-            'price_segment'
-        ])['Total_Value'].sum().unstack(fill_value=0)
-        
-        # Normalizza per percentuale
-        affinity_matrix_pct = affinity_matrix.div(affinity_matrix.sum(axis=1), axis=0) * 100
-        
-        # Heatmap affinità
+
+        # Calcolo della matrice di affinità
+        affinity_matrix = df.groupby(['customer_segment', 'price_segment'])['Total_Value'].sum()
+        affinity_matrix = affinity_matrix.unstack(fill_value=0)
+
+        # Calcolo delle percentuali
+        affinity_percentages = (affinity_matrix.T / affinity_matrix.sum(axis=1)).T * 100
+
+        # Creazione del grafico a heatmap
         fig_affinity = px.imshow(
-            affinity_matrix_pct, 
+            affinity_percentages,
             labels=dict(x="Segmento Prodotto", y="Segmento Cliente", color="% Vendite"),
-            title="Affinità tra Segmenti Clienti e Prodotti"
+            text_auto='.1f',  # Aggiunge annotazioni con formato a una cifra decimale
+            title="Affinità tra Segmenti Clienti e Prodotti",
+            color_continuous_scale="Blues"
         )
+
+        # Configurazione del layout
+        fig_affinity.update_layout(
+            xaxis_title="Segmento Prodotto",
+            yaxis_title="Segmento Cliente",
+            font=dict(size=12),
+            coloraxis_colorbar=dict(title="% Vendite")
+        )
+
+        # Mostra il grafico
         st.plotly_chart(fig_affinity, use_container_width=True)
-        
-        # Tabella riassuntiva
-        st.dataframe(affinity_matrix_pct.round(1), use_container_width=True, hide_index=True)
+
+        # Creazione di una tabella riepilogativa
+        st.subheader("Tabella Riepilogativa dell'Affinità")
+        affinity_table = affinity_percentages.copy()
+        st.dataframe(affinity_table)
+
+        # Interpretazione aggiuntiva
+        st.markdown("""
+        ### Interpretazione del Grafico e della Tabella
+        1. La heatmap mostra l'affinità tra i segmenti di clienti e i segmenti di prodotti, espressa come percentuale del totale delle vendite.
+        2. **Segmento Cliente** (asse Y): rappresenta il tipo di cliente, come VIP, Loyal o At Risk.
+        3. **Segmento Prodotto** (asse X): rappresenta la categoria di prodotto acquistata, come Luxury o Budget.
+        4. I riquadri più scuri indicano una maggiore affinità, ovvero una percentuale più alta delle vendite di quel cliente in un determinato segmento prodotto.
+
+        #### Osservazioni
+        - I clienti **VIP** mostrano un'alta affinità con prodotti **Luxury** (40.7%), mentre i clienti **At Risk** hanno un'affinità maggiore per prodotti **Regular** (25.9%).
+        - I clienti **Loyal** sono distribuiti equamente tra i segmenti **Luxury** e **Premium**, con una leggera preferenza per quest'ultimo (33.9%).
+        - Il segmento **Budget** ha affinità distribuite più uniformemente tra i clienti, indicando un'offerta meno mirata.
+
+        #### Implicazioni
+        - **Strategia di Prodotto**: Investire in prodotti Luxury per clienti VIP e Loyal, ma diversificare l'offerta Budget per attirare più clienti.
+        - **Personalizzazione**: Offrire campagne mirate basate sulle affinità dei segmenti di clienti.
+        """)
+
         
     def render_product_analysis(self, df):
         """Render dell'analisi prodotti"""
