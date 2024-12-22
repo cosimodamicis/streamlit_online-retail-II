@@ -12,6 +12,10 @@ from plotly.subplots import make_subplots #added for advanced product insights
 import os
 from scipy import stats
 from scipy.stats import pearsonr
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, accuracy_score
+
 
 
 class LuxuryRetailDashboard:
@@ -1091,6 +1095,53 @@ class LuxuryRetailDashboard:
                 
         except Exception as e:
             st.error(f"Errore nell'analisi prodotti: {str(e)}")      
+    
+    def render_retention_analysis(self, customer_stats):
+        """
+        Renderizza l'analisi di retention usando Decision Trees.
+        """
+        st.header("📈 Analisi Retention")
+
+        # Creazione del target `is_retained`
+        customer_stats['is_retained'] = (customer_stats['last_purchase'] > pd.Timestamp.now() - pd.Timedelta(days=180)).astype(int)
+
+        # Selezione delle feature e del target
+        features = customer_stats[['recency', 'frequency', 'total_spend', 'avg_order_value']]
+        target = customer_stats['is_retained']
+
+        # Divisione train/test
+        X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
+
+        # Decision Tree Model
+        dt_model = DecisionTreeClassifier(max_depth=4, random_state=42)
+        dt_model.fit(X_train, y_train)
+
+        # Predizioni
+        y_pred = dt_model.predict(X_test)
+
+        # Visualizzazione dei risultati
+        st.subheader("Performance del Modello")
+        st.text("Classification Report:")
+        st.text(classification_report(y_test, y_pred))
+
+        accuracy = accuracy_score(y_test, y_pred)
+        st.metric("Accuracy", f"{accuracy * 100:.2f}%")
+
+        # Visualizzazione dell'albero decisionale
+        st.subheader("Albero Decisionale")
+        fig, ax = plt.subplots(figsize=(12, 8))
+        plot_tree(dt_model, feature_names=features.columns, class_names=['Non Retained', 'Retained'], filled=True, ax=ax)
+        st.pyplot(fig)
+
+        # Insight sulle feature importance
+        st.subheader("Importanza delle Variabili")
+        feature_importance = pd.DataFrame({
+            'Feature': features.columns,
+            'Importance': dt_model.feature_importances_
+        }).sort_values(by='Importance', ascending=False)
+
+        st.bar_chart(feature_importance.set_index('Feature'))
+    
     def render_insights(self, analyzer):
         """Render degli insights di business"""
         st.header("💡 Business Insights")
@@ -1170,7 +1221,8 @@ class LuxuryRetailDashboard:
                     "🎯 Analisi Segmenti",
                     "🛍️ Analisi Prodotti",
                     "🔍 Analisi Prodotti Avanzata",
-                    "💡 Business Insights"
+                    "💡 Business Insights",
+                    "🔄 Analisi Retention"  # Nuova tab per Analisi Retentio
                 ])
                 with tab1:
                     # Mantenere solo la parte iniziale dell'analisi cliente
@@ -1194,6 +1246,9 @@ class LuxuryRetailDashboard:
                     analyzer.df = st.session_state.df
                     analyzer.customer_stats = st.session_state.customer_stats
                     self.render_insights(analyzer)
+
+                with tab7:  # Codice per Analisi Retention
+                    self.render_retention_analysis(st.session_state.customer_stats)
             except Exception as e:
                 st.error(f"Si è verificato un errore nell'analisi: {str(e)}")
         
@@ -1201,5 +1256,6 @@ class LuxuryRetailDashboard:
         self.render_sidebar()
 
 if __name__ == "__main__":
+
     dashboard = LuxuryRetailDashboard()
     dashboard.run()
