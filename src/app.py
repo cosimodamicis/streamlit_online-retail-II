@@ -1111,21 +1111,30 @@ class LuxuryRetailDashboard:
     def render_retention_analysis(self, customer_stats):
         st.header("🔄 Analisi Retention")
 
-        # Creazione del target `is_retained` con criterio migliorato
-        customer_stats['is_retained'] = customer_stats['last_purchase'].dt.year == 2011
-        st.write("Distribuzione con tutti i clienti attivi nel 2011:")
-        st.bar_chart(customer_stats['is_retained'].value_counts())
-
-        st.write("Distribuzione escludendo i nuovi clienti nel 2011:")
-        retained_excluding_new = (
-            (customer_stats['last_purchase'].dt.year == 2011) &
-            (customer_stats['first_purchase'].dt.year < 2011)
+        # Opzione per includere o escludere nuovi clienti del 2011
+        include_new_customers = st.radio(
+            "Includere i clienti che hanno fatto il primo acquisto nel 2011?",
+            ("Includi", "Escludi")
         )
-        st.bar_chart(retained_excluding_new.value_counts())
+
+        if include_new_customers == "Includi":
+            # Tutti i clienti attivi nel 2011
+            customer_stats['is_retained'] = customer_stats['last_purchase'].dt.year == 2011
+            st.write("Distribuzione con tutti i clienti attivi nel 2011:")
+            st.bar_chart(customer_stats['is_retained'].value_counts())
+        else:
+            # Escludere i nuovi clienti del 2011
+            retained_excluding_new = (
+                (customer_stats['last_purchase'].dt.year == 2011) &
+                (customer_stats['first_purchase'].dt.year < 2011)
+            )
+            customer_stats['is_retained'] = retained_excluding_new.astype(int)
+            st.write("Distribuzione escludendo i nuovi clienti nel 2011:")
+            st.bar_chart(customer_stats['is_retained'].value_counts())
 
         # Selezione delle feature e del target
         features = customer_stats[['recency', 'frequency', 'total_spend', 'avg_order_value']]
-        target = customer_stats['is_retained'].astype(int)
+        target = customer_stats['is_retained']
 
         # Verifica statistiche delle feature
         st.write("Statistiche delle Variabili di Input:")
@@ -1174,7 +1183,6 @@ class LuxuryRetailDashboard:
         )
         plt.title('Partial Dependence Plots (Decision Tree)')
         st.pyplot(fig)
-        
 
         # -------------------------
         # Feature Importance
