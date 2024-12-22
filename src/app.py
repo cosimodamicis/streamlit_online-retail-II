@@ -744,18 +744,28 @@ class LuxuryRetailDashboard:
         
         # 4. Affinità tra Segmenti Clienti e Prodotti
         # Verifica della presenza di 'customer_segment'
-        if 'customer_segment' not in df.columns:
+        # Controllo della colonna 'Total_Spend'
+        if 'Total_Spend' not in customer_stats.columns:
+            st.warning("La colonna 'Total_Spend' non è presente. La stiamo calcolando...")
+
+            # Calcola il valore totale speso da ciascun cliente
+            customer_total_spend = df.groupby('Customer ID')['Total_Value'].sum().reset_index()
+            customer_total_spend.columns = ['Customer ID', 'Total_Spend']
+
+            # Unisci il calcolo al dataset customer_stats
+            customer_stats = customer_stats.merge(customer_total_spend, on='Customer ID', how='left')
+
+        # Controllo della colonna 'customer_segment'
+        if 'customer_segment' not in customer_stats.columns:
             st.warning("La colonna 'customer_segment' non è presente. La stiamo ricreando...")
 
-            # Riutilizza la logica di calcolo dalla tab 'Analisi Segmenti'
-            df['customer_segment'] = pd.cut(
-                df['Total_Spend'],  # Sostituisci con la colonna corretta per calcolare i segmenti
-                bins=[0, 500, 1000, 5000, np.inf],  # Modifica i bin in base alla logica
+            # Crea i segmenti cliente basati su 'Total_Spend'
+            customer_stats['customer_segment'] = pd.cut(
+                customer_stats['Total_Spend'],  # Sostituisci con la colonna appropriata
+                bins=[0, 500, 1000, 5000, np.inf],  # Modifica i bin se necessario
                 labels=['At Risk', 'Regular', 'Loyal', 'VIP']
             )
 
-        # Mostra le colonne del DataFrame per debug
-        st.write("Colonne del DataFrame aggiornato:", df.columns)
 
         # Calcolo della matrice di affinità
         affinity_matrix = df.groupby(['customer_segment', 'price_segment'])['Total_Value'].sum()
