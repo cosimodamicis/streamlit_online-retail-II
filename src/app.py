@@ -1098,23 +1098,31 @@ class LuxuryRetailDashboard:
             st.error(f"Errore nell'analisi prodotti: {str(e)}")      
     
     def render_retention_analysis(self, customer_stats):
-        """
-        Renderizza l'analisi di retention usando Decision Trees.
-        """
-        st.header("📈 Analisi Retention")
+        st.header("🔄 Analisi Retention")
 
-        # Creazione del target `is_retained`
-        customer_stats['is_retained'] = (customer_stats['last_purchase'] > pd.Timestamp.now() - pd.Timedelta(days=180)).astype(int)
+        # Creazione del target `is_retained` con criterio migliorato
+        customer_stats['is_retained'] = (
+            (customer_stats['last_purchase'] > pd.Timestamp.now() - pd.Timedelta(days=180)) &
+            (customer_stats['num_orders'] > 1)
+        ).astype(int)
+
+        # Controlla la distribuzione della variabile target
+        st.write("Distribuzione Target:")
+        st.bar_chart(customer_stats['is_retained'].value_counts())
 
         # Selezione delle feature e del target
         features = customer_stats[['recency', 'frequency', 'total_spend', 'avg_order_value']]
         target = customer_stats['is_retained']
 
+        # Verifica statistiche delle feature
+        st.write("Statistiche delle Variabili di Input:")
+        st.dataframe(features.describe())
+
         # Divisione train/test
         X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
 
-        # Decision Tree Model
-        dt_model = DecisionTreeClassifier(max_depth=4, random_state=42)
+        # Decision Tree Model con profondità maggiore
+        dt_model = DecisionTreeClassifier(max_depth=10, random_state=42)
         dt_model.fit(X_train, y_train)
 
         # Predizioni
@@ -1125,6 +1133,7 @@ class LuxuryRetailDashboard:
         st.text("Classification Report:")
         st.text(classification_report(y_test, y_pred))
 
+        # Accuracy
         accuracy = accuracy_score(y_test, y_pred)
         st.metric("Accuracy", f"{accuracy * 100:.2f}%")
 
@@ -1142,6 +1151,7 @@ class LuxuryRetailDashboard:
         }).sort_values(by='Importance', ascending=False)
 
         st.bar_chart(feature_importance.set_index('Feature'))
+
     
     def render_insights(self, analyzer):
         """Render degli insights di business"""
