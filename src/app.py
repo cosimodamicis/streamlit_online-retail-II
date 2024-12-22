@@ -17,6 +17,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.inspection import plot_partial_dependence
+from sklearn.metrics import ConfusionMatrixDisplay
 
 import matplotlib.pyplot as plt
 
@@ -1151,13 +1153,35 @@ class LuxuryRetailDashboard:
         plot_tree(dt_model, feature_names=features.columns, class_names=['Non Retained', 'Retained'], filled=True, ax=ax)
         st.pyplot(fig)
 
-        # Feature Importance (Decision Tree)
-        dt_feature_importance = pd.DataFrame({
+        # -------------------------
+        # Confusion Matrix
+        # -------------------------
+        st.subheader("🔢 Matrice di Confusione")
+        fig, ax = plt.subplots(figsize=(6, 6))
+        ConfusionMatrixDisplay.from_estimator(dt_model, X_test, y_test, display_labels=['Non Retained', 'Retained'], cmap='Blues', ax=ax)
+        plt.title('Matrice di Confusione (Decision Tree)')
+        st.pyplot(fig)
+
+        # -------------------------
+        # Partial Dependence Plots (PDP)
+        # -------------------------
+        st.subheader("📊 Partial Dependence Plots (PDP)")
+        pdp_features = ['recency', 'frequency', 'total_spend']
+        fig, ax = plt.subplots(figsize=(10, 8))
+        plot_partial_dependence(dt_model, X_train, pdp_features, ax=ax, feature_names=features.columns)
+        plt.title('Partial Dependence Plots (Decision Tree)')
+        st.pyplot(fig)
+
+        # -------------------------
+        # Feature Importance
+        # -------------------------
+        st.subheader("Importanza delle Variabili")
+        feature_importance = pd.DataFrame({
             'Feature': features.columns,
             'Importance': dt_model.feature_importances_
         }).sort_values(by='Importance', ascending=False)
 
-        st.bar_chart(dt_feature_importance.set_index('Feature'))
+        st.bar_chart(feature_importance.set_index('Feature'))
 
         # -------------------------
         # Random Forest Model
