@@ -159,7 +159,20 @@ class LuxuryRetailDashboard:
                 title="Valore Medio Ordine per Segmento",
                 labels={'x': 'Segmento', 'y': 'Valore Medio Ordine (€)'}
             )
+            
+            # Aggiungi annotazioni sopra le barre
+            for i, value in enumerate(avg_by_segment.values):
+                fig_avg.add_annotation(
+                    x=avg_by_segment.index[i],
+                    y=value,
+                    text=f"€{value:,.2f}",
+                    showarrow=False,
+                    font=dict(size=12),
+                    yshift=10  # Sposta leggermente il testo verso l'alto
+                )
+            
             st.plotly_chart(fig_avg, use_container_width=True)
+
         
         """Render dell'analisi segmenti"""
         # Prima tabella - sempre visibile
