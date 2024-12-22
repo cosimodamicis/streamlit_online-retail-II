@@ -676,29 +676,48 @@ class LuxuryRetailDashboard:
         """)
 
 
-        # 3. Cross-selling tra segmenti
+        # 3. Cross-Selling tra Segmenti
         st.subheader("3. Cross-Selling tra Segmenti")
-        
-        # Identifica clienti che acquistano in più segmenti
-        client_segment_purchases = df.groupby('Customer ID')['price_segment'].nunique()
-        multi_segment_clients = client_segment_purchases[client_segment_purchases > 1]
-        
-        # Matrice di transizione tra segmenti
-        cross_sell_matrix = pd.crosstab(
-            df[df['Customer ID'].isin(multi_segment_clients.index)]['Customer ID'].map(
-                df.groupby('Customer ID')['price_segment'].first()
-            ),
-            df[df['Customer ID'].isin(multi_segment_clients.index)]['price_segment'],
-            normalize='index'
-        ) * 100
-        
-        # Heatmap cross-selling
-        fig_cross_sell = px.imshow(
-            cross_sell_matrix, 
+
+        # Calcolo della matrice di transizione cross-selling
+        cross_selling_matrix = df.groupby(['initial_segment', 'next_segment'])['CustomerID'].nunique()
+        cross_selling_matrix = cross_selling_matrix.unstack(fill_value=0)
+
+        # Calcolo delle percentuali
+        cross_selling_percentages = (cross_selling_matrix.T / cross_selling_matrix.sum(axis=1)).T * 100
+
+        # Creazione del grafico a heatmap
+        fig_cross_selling = px.imshow(
+            cross_selling_percentages,
             labels=dict(x="Segmento Successivo", y="Segmento Iniziale", color="% Clienti"),
-            title="Matrice Cross-Selling tra Segmenti"
+            text_auto='.1f',  # Aggiunge annotazioni con formato a una cifra decimale
+            title="Matrice Cross-Selling tra Segmenti",
+            color_continuous_scale="Blues",
         )
-        st.plotly_chart(fig_cross_sell, use_container_width=True)
+
+        # Configurazione del layout
+        fig_cross_selling.update_layout(
+            xaxis_title="Segmento Successivo",
+            yaxis_title="Segmento Iniziale",
+            font=dict(size=12),
+            coloraxis_colorbar=dict(title="% Clienti")
+        )
+
+        # Mostra il grafico
+        st.plotly_chart(fig_cross_selling, use_container_width=True)
+
+        # Spiegazione aggiuntiva
+        st.markdown("""
+        ### Cosa significa il Cross-Selling in questo contesto?
+        - Questa matrice rappresenta il comportamento dei clienti che acquistano prodotti appartenenti a segmenti diversi.
+        - Ogni cella mostra la percentuale di clienti che, partendo da un segmento iniziale, hanno acquistato prodotti di un altro segmento.
+        - Un valore più alto indica una maggiore propensione al cross-selling tra quei due segmenti.
+
+        ### Interpretazione del Grafico
+        - Le righe rappresentano il segmento da cui i clienti hanno iniziato i loro acquisti.
+        - Le colonne mostrano i segmenti successivi in cui questi clienti hanno acquistato.
+        - Le celle scure indicano percentuali più alte, cioè una maggiore incidenza di cross-selling.
+        """)
         
         # 4. Customer Segment Affinity
         st.subheader("4. Affinità tra Segmenti Clienti e Prodotti")
