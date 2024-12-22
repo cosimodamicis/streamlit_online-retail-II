@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
-from sklearn.inspection import plot_partial_dependence
+from sklearn.ensemble import PartialDependenceDisplay
 from sklearn.metrics import ConfusionMatrixDisplay
 
 import matplotlib.pyplot as plt
@@ -1167,10 +1167,14 @@ class LuxuryRetailDashboard:
         # -------------------------
         st.subheader("📊 Partial Dependence Plots (PDP)")
         pdp_features = ['recency', 'frequency', 'total_spend']
+        # Partial Dependence Plots
         fig, ax = plt.subplots(figsize=(10, 8))
-        plot_partial_dependence(dt_model, X_train, pdp_features, ax=ax, feature_names=features.columns)
+        PartialDependenceDisplay.from_estimator(
+            dt_model, X_train, ['recency', 'frequency', 'total_spend'], ax=ax
+        )
         plt.title('Partial Dependence Plots (Decision Tree)')
         st.pyplot(fig)
+        
 
         # -------------------------
         # Feature Importance
