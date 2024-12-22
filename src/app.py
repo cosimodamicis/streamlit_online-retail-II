@@ -16,6 +16,7 @@ from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 
 import matplotlib.pyplot as plt
 
@@ -1179,6 +1180,55 @@ class LuxuryRetailDashboard:
         }).sort_values(by='Importance', ascending=False)
 
         st.subheader("Importanza delle Variabili (Random Forest)")
+        st.bar_chart(rf_feature_importance.set_index('Feature'))
+
+            # -------------------------
+        # Ottimizzazione della Random Forest con GridSearchCV
+        # -------------------------
+        st.subheader("🌲 Ottimizzazione Random Forest")
+        param_grid = {
+            'n_estimators': [50, 100, 200],
+            'max_depth': [5, 10, 15],
+            'min_samples_split': [2, 5, 10],
+            'min_samples_leaf': [1, 2, 4]
+        }
+
+        st.write("Esecuzione GridSearchCV per ottimizzare gli iperparametri...")
+        grid_search = GridSearchCV(
+            estimator=RandomForestClassifier(random_state=42),
+            param_grid=param_grid,
+            scoring='accuracy',
+            cv=3,
+            verbose=1,
+            n_jobs=-1
+        )
+        grid_search.fit(X_train, y_train)
+
+        # Migliori parametri trovati
+        st.write("Migliori parametri trovati:", grid_search.best_params_)
+
+        # Modello ottimizzato
+        best_model = grid_search.best_estimator_
+
+        # -------------------------
+        # Random Forest con i migliori parametri
+        # -------------------------
+        st.subheader("🌲 Random Forest Ottimizzato")
+        rf_preds = best_model.predict(X_test)
+
+        st.text("Classification Report (Random Forest Ottimizzato):")
+        st.text(classification_report(y_test, rf_preds))
+
+        rf_accuracy = accuracy_score(y_test, rf_preds)
+        st.metric("Random Forest Accuracy (Ottimizzato)", f"{rf_accuracy * 100:.2f}%")
+
+        # Feature Importance
+        rf_feature_importance = pd.DataFrame({
+            'Feature': features.columns,
+            'Importance': best_model.feature_importances_
+        }).sort_values(by='Importance', ascending=False)
+
+        st.subheader("Importanza delle Variabili (Random Forest Ottimizzato)")
         st.bar_chart(rf_feature_importance.set_index('Feature'))
 
 
