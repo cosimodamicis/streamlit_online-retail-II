@@ -1230,6 +1230,98 @@ class LuxuryRetailDashboard:
         plt.title('Partial Dependence Plots (Random Forest)')
         st.pyplot(fig)
 
+        st.markdown("""
+        # Relazione sull'Analisi della Retention
+
+        ## Introduzione
+        L'analisi della retention ha avuto l'obiettivo di comprendere i fattori che influenzano il comportamento dei clienti in termini di fedeltà e frequenza di acquisto, utilizzando modelli di Machine Learning (“Decision Tree” e “Random Forest”). I risultati sono stati approfonditi tramite tecniche di interpretazione come i Partial Dependence Plots (PDP) e le metriche di performance.
+
+        ---
+
+        ## Risultati Principali
+
+        ### 1. **Performance dei Modelli**
+        #### Decision Tree
+        - **Accuracy**: 75%
+        - **Precision (classe Retained)**: 84%
+        - **Recall (classe Retained)**: 81%
+        - **Variabile più importante**: `recency`
+
+        #### Random Forest
+        - **Accuracy**: 93.79%
+        - **Precision (classe Retained)**: 95%
+        - **Recall (classe Retained)**: 91%
+        - **Variabile più importante**: `recency`
+
+        ### 2. **Analisi delle Variabili Chiave tramite PDP**
+
+        #### **Recency** (tempo dall'ultimo acquisto)
+        - La probabilità di retention diminuisce drasticamente con l'aumento di `recency`.
+        - **Punto critico**: Oltre i 400 giorni, la probabilità di retention si stabilizza a valori bassi (<20%).
+        - **Interpretazione**: Clienti che non effettuano acquisti da molto tempo sono a rischio di abbandono.
+
+        #### **Frequency** (frequenza media degli acquisti)
+        - La probabilità di retention è più alta per valori di `frequency` molto bassi (<0.1), ma diminuisce rapidamente e si stabilizza dopo 0.25 (1 acquisto ogni anno).
+        - **Punto critico**: Valori di `frequency` inferiori a 0.25 indicano clienti meno regolari ma ancora recuperabili.
+        - **Interpretazione**: Alcuni clienti con bassa frequenza potrebbero essere occasionali ma fedeli.
+
+        #### **Total Spend** (spesa totale)
+        - La curva è piatta, indicando un impatto minimo della variabile sulla probabilità di retention.
+        - **Interpretazione**: Il totale speso non è un indicatore significativo per la retention.
+
+        ---
+
+        ## Evidenze Specifiche
+
+        1. **Distribuzione dei Clienti per Retention**:
+        - Escludendo i nuovi clienti del 2011, i modelli migliorano in precisione e recall.
+        - La classe "Retained" è influenzata principalmente da `recency` e `frequency`.
+
+        2. **Confusion Matrix**:
+        - I modelli performano meglio nel predire i clienti retained rispetto ai non-retained.
+        - La classe "Non Retained" potrebbe beneficiare di un miglior bilanciamento dei dati.
+
+        3. **Feature Importance**:
+        - `recency` è la variabile più influente sia per il Decision Tree che per la Random Forest.
+        - `frequency` gioca un ruolo significativo ma secondario.
+        - `total_spend` ha un impatto trascurabile.
+
+        ---
+
+        ## Suggerimenti e Iniziative
+
+        ### **Strategie Basate su Recency**
+        1. **Targeting clienti con alta recency (300-400 giorni):**
+        - Offrire promozioni di ritorno (es. sconti personalizzati o offerte a tempo).
+        - Inviare comunicazioni mirate tramite email o SMS.
+        2. **Programmi di riattivazione per recency > 400 giorni:**
+        - Implementare campagne "win-back" per clienti inattivi.
+        - Offrire incentivi significativi per incoraggiarli a tornare.
+
+        ### **Strategie Basate su Frequency**
+        1. **Incentivare acquisti regolari:**
+        - Programmi fedeltà con premi per acquisti ricorrenti (es. cashback).
+        - Creare campagne stagionali o mensili per mantenere alta la frequenza.
+        2. **Analizzare clienti a bassa frequency (<0.25):**
+        - Identificare segmenti specifici (es. clienti con acquisti occasionali ma significativi).
+        - Offrire pacchetti o abbonamenti per fidelizzarli.
+
+        ### **Strategie Generali**
+        1. **Segmentazione Avanzata:**
+        - Segmentare ulteriormente i clienti in base a combinazioni di `recency` e `frequency` per personalizzare le strategie.
+        2. **Integrare Nuove Variabili:**
+        - Esplorare variabili aggiuntive come il tipo di prodotto acquistato o la geolocalizzazione per migliorare il modello.
+        3. **Monitoraggio Continuo:**
+        - Monitorare costantemente i clienti retained e non-retained per valutare l'efficacia delle iniziative.
+
+        ---
+
+        ## Conclusioni
+        L'analisi ha evidenziato che la **recency** è il principale driver di retention, seguito dalla **frequency**. Le iniziative suggerite mirano a ridurre il rischio di abbandono e a incrementare la fedeltà dei clienti attraverso strategie mirate e programmi personalizzati.
+
+        Ulteriori approfondimenti potrebbero includere modelli di clustering per identificare pattern nascosti nei dati e migliorare ulteriormente l'efficacia delle azioni.
+        """)
+
         # -------------------------
         # Ottimizzazione della Random Forest con GridSearchCV
         # -------------------------
