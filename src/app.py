@@ -1106,7 +1106,9 @@ class LuxuryRetailDashboard:
     def render_retention_analysis(self, customer_stats):
         st.header("🔄 Analisi Retention")
 
-
+        # Creazione del target `is_retained` con criterio migliorato
+        # Per la distribuzione
+        customer_stats['is_retained'] = customer_stats['last_purchase'].dt.year == 2011
         st.write("Distribuzione con tutti i clienti attivi nel 2011:")
         st.bar_chart(customer_stats['is_retained'].value_counts())
 
@@ -1117,9 +1119,7 @@ class LuxuryRetailDashboard:
         )
         st.bar_chart(retained_excluding_new.value_counts())
 
-        # Creazione del target `is_retained` con criterio migliorato
-        # Per la distribuzione
-        customer_stats['is_retained'] = customer_stats['last_purchase'].dt.year == 2011
+        
         st.write("Distribuzione Target (booleano):")
         st.bar_chart(customer_stats['is_retained'].value_counts())
 
