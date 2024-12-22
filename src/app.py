@@ -15,6 +15,7 @@ from scipy.stats import pearsonr
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
+import matplotlib.pyplot as plt
 
 
 
