@@ -1889,7 +1889,7 @@ class LuxuryRetailDashboard:
             - Analisi cliente
             - Segmentazione RFM
             - Analisi prodotti
-            - Insights di business
+            - Insight di business
             """)
             
     def run(self):
