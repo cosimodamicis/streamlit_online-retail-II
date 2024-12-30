@@ -1397,17 +1397,18 @@ class LuxuryRetailDashboard:
 
 
     def render_yoy_analysis(self, df: pd.DataFrame):
-        """Render dell'analisi Year-over-Year"""
+        """Render dell'analisi Year-over-Year completa"""
         if df is None:
             st.warning("Nessun dato disponibile per l'analisi YoY.")
             return
             
         st.header("📈 Analisi Year-over-Year (2010 vs 2011)")
         
-        # Assicuriamoci che le date siano nel formato corretto
+        # Preparazione dati
         df = df.copy()
         df['year'] = df['InvoiceDate'].dt.year
         df['month'] = df['InvoiceDate'].dt.month
+        df['year_month'] = df['InvoiceDate'].dt.to_period('M')
         
         # Filtriamo solo per 2010 e 2011
         df_yoy = df[df['year'].isin([2010, 2011])]
@@ -1417,15 +1418,14 @@ class LuxuryRetailDashboard:
             return
             
         try:
-            # Calcolo metriche YoY principali
+            # 1. METRICHE PRINCIPALI YOY
             metrics_by_year = df_yoy.groupby('year').agg({
-                'Total_Value': 'sum',  # Revenue totale
-                'Invoice': 'nunique',  # Numero ordini
-                'Customer ID': 'nunique',  # Clienti unici
-                'Quantity': 'sum'  # Volume vendite
+                'Total_Value': 'sum',
+                'Invoice': 'nunique',
+                'Customer ID': 'nunique',
+                'Quantity': 'sum'
             }).round(2)
             
-            # Calcola variazioni YoY
             yoy_changes = {
                 'Revenue': ((metrics_by_year.loc[2011, 'Total_Value'] / 
                             metrics_by_year.loc[2010, 'Total_Value'] - 1) * 100).round(1),
@@ -1437,7 +1437,6 @@ class LuxuryRetailDashboard:
                         metrics_by_year.loc[2010, 'Quantity'] - 1) * 100).round(1)
             }
             
-            # Display KPIs
             st.subheader("Metriche Principali YoY")
             col1, col2, col3, col4 = st.columns(4)
             
@@ -1453,15 +1452,239 @@ class LuxuryRetailDashboard:
                 st.metric("Clienti YoY", f"{yoy_changes['Clienti']}%")
             with col4:
                 st.metric("Volume YoY", f"{yoy_changes['Volume']}%")
-                
+
+            # 2. TREND MENSILE YOY
             st.markdown("---")
+            st.subheader("Trend Mensile YoY")
             
-            # Placeholder per le prossime implementazioni
-            st.info("Altre analisi YoY saranno implementate nelle prossime versioni.")
+            monthly_revenue = df_yoy.groupby(['year', 'month'])['Total_Value'].sum().unstack(0)
+            monthly_growth = ((monthly_revenue[2011] / monthly_revenue[2010] - 1) * 100).round(1)
+            
+            # Grafico trend mensile
+            fig_monthly = go.Figure()
+            fig_monthly.add_trace(go.Scatter(
+                x=list(range(1,13)), 
+                y=monthly_revenue[2010],
+                name='2010',
+                mode='lines+markers'
+            ))
+            fig_monthly.add_trace(go.Scatter(
+                x=list(range(1,13)), 
+                y=monthly_revenue[2011],
+                name='2011',
+                mode='lines+markers'
+            ))
+            
+            fig_monthly.update_layout(
+                title='Confronto Revenue Mensile 2010 vs 2011',
+                xaxis_title='Mese',
+                yaxis_title='Revenue (€)',
+                hovermode='x unified'
+            )
+            st.plotly_chart(fig_monthly, use_container_width=True)
+            
+            # Grafico crescita mensile
+            fig_growth = go.Figure(go.Bar(
+                x=list(range(1,13)),
+                y=monthly_growth,
+                text=[f"{v:,.1f}%" for v in monthly_growth],
+                textposition='auto',
+            ))
+            fig_growth.update_layout(
+                title='Crescita Mensile YoY (%)',
+                xaxis_title='Mese',
+                yaxis_title='Crescita %',
+                showlegend=False
+            )
+            st.plotly_chart(fig_growth, use_container_width=True)
+
+            # 3. ANALISI SEGMENTI YOY
+            st.markdown("---")
+            st.subheader("Performance Segmenti YoY")
+            
+            # Crescita per segmento di prezzo
+            segment_yoy = df_yoy.groupby(['year', 'price_segment'])['Total_Value'].sum().unstack(0)
+            segment_growth = ((segment_yoy[2011] / segment_yoy[2010] - 1) * 100).round(1)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Revenue per segmento
+                fig_segments = go.Figure()
+                for year in [2010, 2011]:
+                    fig_segments.add_trace(go.Bar(
+                        name=str(year),
+                        x=segment_yoy.index,
+                        y=segment_yoy[year],
+                        text=[f"€{v:,.0f}" for v in segment_yoy[year]],
+                        textposition='auto',
+                    ))
+                
+                fig_segments.update_layout(
+                    title='Revenue per Segmento',
+                    xaxis_title='Segmento',
+                    yaxis_title='Revenue (€)',
+                    barmode='group'
+                )
+                st.plotly_chart(fig_segments, use_container_width=True)
+                
+            with col2:
+                # Crescita per segmento
+                fig_segment_growth = go.Figure(go.Bar(
+                    x=segment_growth.index,
+                    y=segment_growth,
+                    text=[f"{v:,.1f}%" for v in segment_growth],
+                    textposition='auto',
+                ))
+                
+                fig_segment_growth.update_layout(
+                    title='Crescita YoY per Segmento (%)',
+                    xaxis_title='Segmento',
+                    yaxis_title='Crescita %',
+                    showlegend=False
+                )
+                st.plotly_chart(fig_segment_growth, use_container_width=True)
+
+            # 4. ANALISI CLIENTE YOY
+            st.markdown("---")
+            st.subheader("Evoluzione Comportamento Cliente")
+            
+            # Metriche per cliente
+            customer_metrics = df_yoy.groupby(['year', 'Customer ID']).agg({
+                'Total_Value': ['sum', 'mean'],
+                'Invoice': 'nunique',
+            }).round(2)
+            
+            # Reset index per accesso più facile
+            customer_metrics.columns = ['total_spend', 'avg_order_value', 'num_orders']
+            customer_metrics = customer_metrics.reset_index()
+            
+            # Calcolo metriche medie per cliente
+            avg_metrics = customer_metrics.groupby('year').agg({
+                'total_spend': 'mean',
+                'avg_order_value': 'mean',
+                'num_orders': 'mean'
+            }).round(2)
+            
+            # Calcolo variazioni
+            customer_yoy = {
+                'Spesa Media': ((avg_metrics.loc[2011, 'total_spend'] / 
+                            avg_metrics.loc[2010, 'total_spend'] - 1) * 100).round(1),
+                'Valore Medio Ordine': ((avg_metrics.loc[2011, 'avg_order_value'] / 
+                                    avg_metrics.loc[2010, 'avg_order_value'] - 1) * 100).round(1),
+                'Frequenza Ordini': ((avg_metrics.loc[2011, 'num_orders'] / 
+                                    avg_metrics.loc[2010, 'num_orders'] - 1) * 100).round(1)
+            }
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Δ Spesa Media per Cliente", f"{customer_yoy['Spesa Media']}%")
+            with col2:
+                st.metric("Δ Valore Medio Ordine", f"{customer_yoy['Valore Medio Ordine']}%")
+            with col3:
+                st.metric("Δ Frequenza Ordini", f"{customer_yoy['Frequenza Ordini']}%")
+
+            # 5. ANALISI RETENTION
+            st.markdown("---")
+            st.subheader("Analisi Retention")
+            
+            # Calcolo retention
+            customers_2010 = set(df_yoy[df_yoy['year']==2010]['Customer ID'].unique())
+            customers_2011 = set(df_yoy[df_yoy['year']==2011]['Customer ID'].unique())
+            retained = customers_2010.intersection(customers_2011)
+            new_2011 = customers_2011 - customers_2010
+            
+            retention_rate = (len(retained) / len(customers_2010) * 100).round(1)
+            acquisition_rate = (len(new_2011) / len(customers_2010) * 100).round(1)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric(
+                    "Retention Rate",
+                    f"{retention_rate}%",
+                    help=f"Clienti mantenuti: {len(retained)}"
+                )
+            with col2:
+                st.metric(
+                    "Acquisition Rate",
+                    f"{acquisition_rate}%",
+                    help=f"Nuovi clienti 2011: {len(new_2011)}"
+                )
+
+            # 6. ANALISI STAGIONALE YOY
+            st.markdown("---")
+            st.subheader("Performance Stagionale YoY")
+            
+            seasonal_yoy = df_yoy.groupby(['year', 'season'])['Total_Value'].sum().unstack(0)
+            seasonal_growth = ((seasonal_yoy[2011] / seasonal_yoy[2010] - 1) * 100).round(1)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Revenue per stagione
+                fig_seasonal = go.Figure()
+                for year in [2010, 2011]:
+                    fig_seasonal.add_trace(go.Bar(
+                        name=str(year),
+                        x=seasonal_yoy.index,
+                        y=seasonal_yoy[year],
+                        text=[f"€{v:,.0f}" for v in seasonal_yoy[year]],
+                        textposition='auto',
+                    ))
+                
+                fig_seasonal.update_layout(
+                    title='Revenue per Stagione',
+                    xaxis_title='Stagione',
+                    yaxis_title='Revenue (€)',
+                    barmode='group'
+                )
+                st.plotly_chart(fig_seasonal, use_container_width=True)
+                
+            with col2:
+                # Crescita stagionale
+                fig_seasonal_growth = go.Figure(go.Bar(
+                    x=seasonal_growth.index,
+                    y=seasonal_growth,
+                    text=[f"{v:,.1f}%" for v in seasonal_growth],
+                    textposition='auto',
+                ))
+                
+                fig_seasonal_growth.update_layout(
+                    title='Crescita YoY per Stagione (%)',
+                    xaxis_title='Stagione',
+                    yaxis_title='Crescita %',
+                    showlegend=False
+                )
+                st.plotly_chart(fig_seasonal_growth, use_container_width=True)
+
+            # 7. INSIGHTS TESTUALI
+            st.markdown("---")
+            st.markdown("""
+            ### 🔍 Key Insights YoY
+
+            1. **Trend Generale**
+                - Confronto dell'andamento complessivo 2010 vs 2011
+                - Identificazione dei mesi di maggiore crescita/decrescita
+                - Pattern stagionali ricorrenti o modificati
+
+            2. **Performance per Segmento**
+                - Analisi dei segmenti trainanti
+                - Evoluzione del mix di revenue
+                - Cambiamenti nelle preferenze dei clienti
+
+            3. **Comportamento Cliente**
+                - Evoluzione del valore medio cliente
+                - Cambiamenti nella frequenza di acquisto
+                - Analisi della retention e acquisizione
+
+            4. **Opportunità Identificate**
+                - Periodi con maggior potenziale di crescita
+                - Segmenti con performance sotto le attese
+                - Aree di miglioramento nella retention
+            """)
             
         except Exception as e:
             st.error(f"Errore durante l'analisi YoY: {str(e)}")
-
     
     def render_insights(self, analyzer):
         """Render degli insights di business"""
