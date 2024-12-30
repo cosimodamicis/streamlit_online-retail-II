@@ -1664,7 +1664,7 @@ class LuxuryRetailDashboard:
                     delta_color="normal"
                 )
 
-                st.markdown("""
+            st.markdown("""
                     ### 📊 Interpretazione Evoluzione Comportamento Cliente
 
                     #### Performance Generale
