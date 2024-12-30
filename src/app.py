@@ -525,7 +525,7 @@ class LuxuryRetailDashboard:
         pivot_table_display = pivot_table.applymap(lambda x: f"€{x:,.2f}")
 
         # Mostra la tabella riepilogativa
-        st.dataframe(pivot_table_display, use_container_width=True, hide_index=True)
+        st.dataframe(pivot_table_display, use_container_width=True, hide_index=False)
 
         # Spiegazione aggiuntiva per interpretare il grafico e la tabella
         st.markdown("""
