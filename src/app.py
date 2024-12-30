@@ -1716,19 +1716,31 @@ class LuxuryRetailDashboard:
             st.subheader("Analisi Retention")
 
             # Calcolo retention
+            # Prima calcolare tutti i valori necessari
             customers_2010 = set(df_yoy[df_yoy['year']==2010]['Customer ID'].unique())
             customers_2011 = set(df_yoy[df_yoy['year']==2011]['Customer ID'].unique())
             retained = customers_2010.intersection(customers_2011)
             new_2011 = customers_2011 - customers_2010
 
-            # Calcolo percentuali - usiamo round() invece di .round()
+            # Calcolo retention e acquisition rate
             retention_rate = round((len(retained) / len(customers_2010) * 100), 1)
             acquisition_rate = round((len(new_2011) / len(customers_2010) * 100), 1)
 
-            col1, col2 = st.columns(2)
+            # Calcolo valori per segmenti di clienti
+            retained_value_2010 = df_yoy[
+                (df_yoy['year'] == 2010) & 
+                (df_yoy['Customer ID'].isin(retained))
+            ]['Total_Value'].sum()
+
+            retained_value_2011 = df_yoy[
+                (df_yoy['year'] == 2011) & 
+                (df_yoy['Customer ID'].isin(retained))
+            ]['Total_Value'].sum()
+
+            # Visualizzazione metriche
             col1, col2 = st.columns(2)
             with col1:
-                retained_delta = f"-{len(customers_2010) - len(retained):,}"  # Numero di clienti persi
+                retained_delta = f"-{len(customers_2010) - len(retained):,}"
                 st.metric(
                     "Retention Rate", 
                     f"{retention_rate}%",
@@ -1737,7 +1749,7 @@ class LuxuryRetailDashboard:
                     help=f"Clienti mantenuti: {len(retained):,}"
                 )
             with col2:
-                acquisition_delta = f"+{len(new_2011):,}"  # Numero di nuovi clienti
+                acquisition_delta = f"+{len(new_2011):,}"
                 st.metric(
                     "Acquisition Rate", 
                     f"{acquisition_rate}%",
@@ -1745,7 +1757,8 @@ class LuxuryRetailDashboard:
                     delta_color="normal",
                     help=f"Nuovi clienti 2011: {len(new_2011):,}"
                 )
-                
+
+            # Ora possiamo usare tutti i valori nel markdown
             st.markdown(f"""
             ### 📊 Interpretazione Metriche Retention
 
