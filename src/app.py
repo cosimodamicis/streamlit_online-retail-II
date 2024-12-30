@@ -592,30 +592,52 @@ class LuxuryRetailDashboard:
         st.dataframe(pearson_df, use_container_width=True, hide_index=True)
 
         st.markdown("""
-            ### Interpretazione del Grafico: Revenue per Segmento e Stagione
+            ### Interpretazione Statistica e Business dei Pattern Stagionali
 
-            - **Luxury**:
-            - Il revenue è distribuito uniformemente tra le stagioni, senza picchi evidenti.
-            - Questo conferma che non ci sono differenze significative tra stagioni (**p = 0.1147**, Test Statistico).
-            - Tuttavia, il segmento segue strettamente il trend complessivo delle vendite stagionali (**Rho = 0.9918**, Correlazione Lineare).
+            #### 1. Significatività Stagionale
+            - Tutti i segmenti mostrano differenze stagionali statisticamente significative (p-value = 0), indicando che la stagionalità è un fattore determinante per tutti i livelli di prezzo.
 
-            - **Premium**:
-            - Il revenue varia significativamente tra le stagioni, con il picco in **Fall** e il valore minimo in **Summer**.
-            - Questo è confermato dalle differenze significative tra stagioni rilevate dal Test Statistico (**p = 0**).
-            - La forte correlazione lineare (**Rho = 0.981**) indica che le variazioni interne seguono comunque il trend generale.
+            #### 2. Pattern di Stagionalità
+            - **Dominanza dell'Autunno**: Tutti i segmenti mostrano il picco di revenue in autunno, rappresentando circa il 35% del fatturato annuale per ogni segmento  
+            - **Estate vs Inverno**:  
+            - Luxury e Regular mantengono performance simili in estate e inverno
+            - Premium mostra una forte debolezza estiva (-33% rispetto all'inverno)
+            - Budget ha la sua seconda migliore performance in primavera, contrariamente agli altri segmenti
 
-            - **Budget**:
-            - Il revenue è più alto in **Fall** rispetto a **Summer**, mostrando variazioni stagionali pronunciate.
-            - Differenze significative tra stagioni sono confermate dal Test Statistico (**p = 0**).
-            - La correlazione lineare alta (**Rho = 0.9551**) suggerisce che, nonostante le variazioni interne, il segmento segue il trend complessivo.
+            #### 3. Intensità delle Variazioni
+            - Premium mostra le oscillazioni più marcate (102% tra picco e minimo)  
+            - Budget e Luxury mostrano variazioni intermedie (73% e 64% rispettivamente)  
+            - Regular ha le variazioni più contenute (61%)
 
-            - **Regular**:
-            - Le differenze stagionali sono evidenti, con il revenue massimo in **Fall** e minimo in **Summer**.
-            - Le differenze sono significative secondo il Test Statistico (**p = 0**).
-            - La correlazione lineare (**Rho = 0.9771**) mostra che il segmento è ben allineato con le vendite complessive.
+            #### 4. Correlazioni con il Trend Generale (Rho)
+            - Tutti i segmenti mostrano correlazioni molto alte (>0.94) con l'andamento generale  
+            - La correlazione decresce leggermente man mano che si scende di fascia prezzo:  
+            - Luxury: 0.9976 
+            - Premium: 0.9556
+            - Regular: 0.9832
+            - Budget: 0.9432
 
-            ### Conclusione Generale
-            Il segmento **Luxury** si distingue per la sua uniformità stagionale, mentre gli altri segmenti presentano variazioni significative tra stagioni. Tuttavia, tutti i segmenti seguono strettamente le tendenze generali delle vendite stagionali.
+            #### Suggerimenti per Approfondimenti
+
+            1. **Analisi Mix Prodotto**  
+            Esaminare se le variazioni stagionali sono dovute a:
+            - Cambiamenti nel mix di prodotti venduti
+            - Variazioni di prezzo/promozioni 
+            - Variazioni nei volumi degli stessi prodotti
+
+            2. **Analisi Clientela**
+            - Verificare se cambiano i pattern di acquisto degli stessi clienti
+            - O se cambiano i segmenti di clientela attivi nelle diverse stagioni
+
+            3. **Analisi Marginalità**
+            - Studiare come variano i margini nelle diverse stagioni
+            - Valutare l'impatto delle promozioni stagionali
+
+            4. **Confronto con il Mercato**
+            - Confrontare questi pattern con i trend di mercato del settore luxury
+            - Identificare eventuali specificità del brand
+
+            *Queste analisi aggiuntive potrebbero fornire insight più actionable per ottimizzare la strategia stagionale per ciascun segmento.*
             """)
 
         
