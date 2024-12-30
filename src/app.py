@@ -1611,7 +1611,45 @@ class LuxuryRetailDashboard:
                     f"{acquisition_rate}%",
                     help=f"Nuovi clienti 2011: {len(new_2011)}"
                 )
+            
+            st.markdown("""
+                    ### 📊 Interpretazione Metriche Principali YoY
 
+                    #### Performance Generale
+                    - Il business ha registrato un **calo generale** nel 2011 rispetto al 2010, con riduzioni in tutti i KPI principali
+                    - Il **volume** ha subito la contrazione maggiore (-10.9%), suggerendo una significativa riduzione nelle quantità vendute
+                    - Il **revenue** è calato del 4.4% (€-379,351), una diminuzione meno marcata rispetto al volume, suggerendo possibili aumenti di prezzo o shift verso prodotti a maggior valore
+
+                    #### Dettaglio KPI
+                    1. **Revenue** (-4.4%)  
+                    - *Calcolo*: Somma totale di (Quantità × Prezzo) per anno
+                    - *Variazione*: ((Revenue 2011 - Revenue 2010) / Revenue 2010) × 100
+
+                    2. **Ordini** (-6.5%)
+                    - *Calcolo*: Numero univoco di ordini (Invoice) per anno
+                    - *Variazione*: ((N° Ordini 2011 - N° Ordini 2010) / N° Ordini 2010) × 100
+
+                    3. **Clienti** (-0.3%)
+                    - *Calcolo*: Numero univoco di Customer ID per anno
+                    - *Variazione*: ((N° Clienti 2011 - N° Clienti 2010) / N° Clienti 2010) × 100
+
+                    4. **Volume** (-10.9%)
+                    - *Calcolo*: Somma totale delle quantità vendute per anno
+                    - *Variazione*: ((Quantità 2011 - Quantità 2010) / Quantità 2010) × 100
+
+                    #### Insights Chiave
+                    1. La minima perdita di clienti (-0.3%) rispetto al calo più marcato di ordini (-6.5%) suggerisce che i clienti esistenti hanno **ridotto la frequenza di acquisto**
+
+                    2. Il divario tra calo del revenue (-4.4%) e volume (-10.9%) indica un possibile **aumento del valore medio per unità venduta**, che potrebbe derivare da:
+                    - Aumenti di prezzo
+                    - Mix di vendita spostato verso prodotti premium
+                    - Minori promozioni/sconti
+
+                    3. Le metriche suggeriscono la necessità di:
+                    - Analizzare le cause della riduzione della frequenza d'acquisto
+                    - Verificare l'impatto dei possibili aumenti di prezzo sulla domanda
+                    - Investigare se il calo dei volumi è concentrato in specifici segmenti di prodotto
+                    """)
             # 6. ANALISI STAGIONALE YOY
             st.markdown("---")
             st.subheader("Performance Stagionale YoY")
