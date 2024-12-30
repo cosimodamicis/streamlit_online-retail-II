@@ -1453,29 +1453,29 @@ class LuxuryRetailDashboard:
                 st.metric(
                     "Revenue YoY", 
                     f"{yoy_changes['Revenue']}%",
-                    delta=f"€{abs(absolute_changes['Revenue']):,.0f}",
-                    delta_color="normal" if absolute_changes['Revenue'] >= 0 else "inverse"
+                    delta=f"-€{abs(absolute_changes['Revenue']):,.0f}",  # Aggiungo il segno - 
+                    delta_color="normal"
                 )
             with col2:
                 st.metric(
                     "Ordini YoY", 
                     f"{yoy_changes['Ordini']}%",
-                    delta=f"{abs(absolute_changes['Ordini']):,.0f}",
-                    delta_color="normal" if absolute_changes['Ordini'] >= 0 else "inverse"
+                    delta=f"-{abs(absolute_changes['Ordini']):,.0f}",  # Aggiungo il segno -
+                    delta_color="normal"
                 )
             with col3:
                 st.metric(
                     "Clienti YoY", 
                     f"{yoy_changes['Clienti']}%",
-                    delta=f"{abs(absolute_changes['Clienti']):,.0f}",
-                    delta_color="normal" if absolute_changes['Clienti'] >= 0 else "inverse"
+                    delta=f"-{abs(absolute_changes['Clienti']):,.0f}",  # Aggiungo il segno -
+                    delta_color="normal"
                 )
             with col4:
                 st.metric(
                     "Volume YoY", 
                     f"{yoy_changes['Volume']}%",
-                    delta=f"{abs(absolute_changes['Volume']):,.0f}",
-                    delta_color="normal" if absolute_changes['Volume'] >= 0 else "inverse"
+                    delta=f"-{abs(absolute_changes['Volume']):,.0f}",  # Aggiungo il segno -
+                    delta_color="normal"
                 )
 
 
