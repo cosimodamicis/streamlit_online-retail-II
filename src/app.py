@@ -1640,13 +1640,76 @@ class LuxuryRetailDashboard:
                                     avg_metrics.loc[2010, 'num_orders'] - 1) * 100).round(1)
             }
             
+            
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("Δ Spesa Media per Cliente", f"{customer_yoy['Spesa Media']}%")
+                st.metric(
+                    "Δ Spesa Media per Cliente", 
+                    f"{customer_yoy['Spesa Media']}%",
+                    delta=f"-€{abs(avg_metrics.loc[2011, 'total_spend'] - avg_metrics.loc[2010, 'total_spend']):,.2f}",
+                    delta_color="normal"
+                )
             with col2:
-                st.metric("Δ Valore Medio Ordine", f"{customer_yoy['Valore Medio Ordine']}%")
+                st.metric(
+                    "Δ Valore Medio Ordine", 
+                    f"{customer_yoy['Valore Medio Ordine']}%",
+                    delta=f"€{abs(avg_metrics.loc[2011, 'avg_order_value'] - avg_metrics.loc[2010, 'avg_order_value']):,.2f}",
+                    delta_color="normal"
+                )
             with col3:
-                st.metric("Δ Frequenza Ordini", f"{customer_yoy['Frequenza Ordini']}%")
+                st.metric(
+                    "Δ Frequenza Ordini", 
+                    f"{customer_yoy['Frequenza Ordini']}%",
+                    delta=f"-{abs(avg_metrics.loc[2011, 'num_orders'] - avg_metrics.loc[2010, 'num_orders']):,.1f}",
+                    delta_color="normal"
+                )
+
+                st.markdown("""
+                    ### 📊 Interpretazione Evoluzione Comportamento Cliente
+
+                    #### Performance Generale
+                    - La **spesa media per cliente** è diminuita del 4.1%, indicando una riduzione nel valore lifetime dei clienti
+                    - Il **valore medio degli ordini** è aumentato significativamente (+83.8%), suggerendo un cambio nelle abitudini di acquisto
+                    - La **frequenza degli ordini** è calata del 6.2%, mostrando una minore attività dei clienti
+
+                    #### Analisi Dettagliata
+                    1. **Spesa Media per Cliente** (-4.1%)
+                    - *Calcolo*: Revenue totale / Numero di clienti unici per anno
+                    - *Variazione*: ((Spesa Media 2011 - Spesa Media 2010) / Spesa Media 2010) × 100
+                    - Il calo suggerisce una diminuzione generale nella propensione alla spesa
+
+                    2. **Valore Medio Ordine** (+83.8%)
+                    - *Calcolo*: Revenue totale / Numero di ordini per anno
+                    - *Variazione*: ((Valore Medio 2011 - Valore Medio 2010) / Valore Medio 2010) × 100
+                    - L'aumento significativo indica un consolidamento degli ordini: meno ordini ma di valore maggiore
+
+                    3. **Frequenza Ordini** (-6.2%)
+                    - *Calcolo*: Numero ordini / Numero clienti unici per anno
+                    - *Variazione*: ((Frequenza 2011 - Frequenza 2010) / Frequenza 2010) × 100
+                    - Il calo nella frequenza suggerisce una minore fidelizzazione
+
+                    #### Insights Chiave
+                    1. Il forte aumento del valore medio ordine (+83.8%) combinato con il calo della frequenza (-6.2%) suggerisce un cambio significativo nel comportamento d'acquisto:
+                    - I clienti preferiscono fare ordini più sostanziosi ma meno frequenti
+                    - Possibile ottimizzazione dei costi di spedizione da parte dei clienti
+                    - Potenziale opportunità per strategie di up-selling
+
+                    2. Il calo della spesa media (-4.1%) nonostante l'aumento del valore ordine indica:
+                    - Una possibile perdita di opportunità di vendita
+                    - Necessità di lavorare sulla frequenza di acquisto
+                    - Potenziale spazio per programmi di fidelizzazione
+
+                    #### Suggerimenti Operativi
+                    1. Implementare strategie per aumentare la frequenza di acquisto:
+                    - Programmi di fedeltà con incentivi sulla frequenza
+                    - Comunicazioni marketing più regolari
+                    - Offerte speciali per riattivare clienti dormienti
+
+                    2. Capitalizzare sul trend degli ordini di maggior valore:
+                    - Bundle di prodotti
+                    - Sconti progressivi su ordini più grandi
+                    - Servizi premium per ordini di alto valore
+                    """)
 
             # 5. ANALISI RETENTION
             st.markdown("---")
