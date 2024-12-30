@@ -1396,6 +1396,72 @@ class LuxuryRetailDashboard:
             st.bar_chart(rf_feature_importance.set_index('Feature'))
 
 
+    def render_yoy_analysis(self, df: pd.DataFrame):
+        """Render dell'analisi Year-over-Year"""
+        if df is None:
+            st.warning("Nessun dato disponibile per l'analisi YoY.")
+            return
+            
+        st.header("📈 Analisi Year-over-Year (2010 vs 2011)")
+        
+        # Assicuriamoci che le date siano nel formato corretto
+        df = df.copy()
+        df['year'] = df['InvoiceDate'].dt.year
+        df['month'] = df['InvoiceDate'].dt.month
+        
+        # Filtriamo solo per 2010 e 2011
+        df_yoy = df[df['year'].isin([2010, 2011])]
+        
+        if len(df_yoy) == 0:
+            st.warning("Non ci sono dati sufficienti per un'analisi YoY tra 2010 e 2011.")
+            return
+            
+        try:
+            # Calcolo metriche YoY principali
+            metrics_by_year = df_yoy.groupby('year').agg({
+                'Total_Value': 'sum',  # Revenue totale
+                'Invoice': 'nunique',  # Numero ordini
+                'Customer ID': 'nunique',  # Clienti unici
+                'Quantity': 'sum'  # Volume vendite
+            }).round(2)
+            
+            # Calcola variazioni YoY
+            yoy_changes = {
+                'Revenue': ((metrics_by_year.loc[2011, 'Total_Value'] / 
+                            metrics_by_year.loc[2010, 'Total_Value'] - 1) * 100).round(1),
+                'Ordini': ((metrics_by_year.loc[2011, 'Invoice'] / 
+                        metrics_by_year.loc[2010, 'Invoice'] - 1) * 100).round(1),
+                'Clienti': ((metrics_by_year.loc[2011, 'Customer ID'] / 
+                            metrics_by_year.loc[2010, 'Customer ID'] - 1) * 100).round(1),
+                'Volume': ((metrics_by_year.loc[2011, 'Quantity'] / 
+                        metrics_by_year.loc[2010, 'Quantity'] - 1) * 100).round(1)
+            }
+            
+            # Display KPIs
+            st.subheader("Metriche Principali YoY")
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric(
+                    "Revenue YoY", 
+                    f"{yoy_changes['Revenue']}%",
+                    delta=f"€{(metrics_by_year.loc[2011, 'Total_Value'] - metrics_by_year.loc[2010, 'Total_Value']):,.0f}"
+                )
+            with col2:
+                st.metric("Ordini YoY", f"{yoy_changes['Ordini']}%")
+            with col3:
+                st.metric("Clienti YoY", f"{yoy_changes['Clienti']}%")
+            with col4:
+                st.metric("Volume YoY", f"{yoy_changes['Volume']}%")
+                
+            st.markdown("---")
+            
+            # Placeholder per le prossime implementazioni
+            st.info("Altre analisi YoY saranno implementate nelle prossime versioni.")
+            
+        except Exception as e:
+            st.error(f"Errore durante l'analisi YoY: {str(e)}")
+
     
     def render_insights(self, analyzer):
         """Render degli insights di business"""
@@ -1469,16 +1535,17 @@ class LuxuryRetailDashboard:
                 # Render components
                 self.render_kpis(st.session_state.df, st.session_state.customer_stats)
                 
-                            # Tabs per le analisi
-                tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+                tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
                     "👥 Analisi Cliente",
                     "📊 Analisi RFM",
                     "🎯 Analisi Segmenti",
                     "🛍️ Analisi Prodotti",
                     "🔍 Analisi Prodotti Avanzata",
                     "💡 Business Insights",
-                    "🔄 Analisi Retention"  # Nuova tab per Analisi Retentio
+                    "🔄 Analisi Retention",
+                    "📈 Analisi YoY"
                 ])
+            
                 with tab1:
                     # Mantenere solo la parte iniziale dell'analisi cliente
                     # (fino a prima della sezione RFM)
@@ -1504,6 +1571,10 @@ class LuxuryRetailDashboard:
 
                 with tab7:  # Codice per Analisi Retention
                     self.render_retention_analysis(st.session_state.customer_stats)
+
+                with tab8:
+                    self.render_yoy_analysis(st.session_state.df)
+
             except Exception as e:
                 st.error(f"Si è verificato un errore nell'analisi: {str(e)}")
         
