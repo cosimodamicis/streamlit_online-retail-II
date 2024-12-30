@@ -1878,6 +1878,7 @@ class LuxuryRetailDashboard:
             **Progetto**: Luxury Retail Analytics
             
             **Dataset**: Online Retail II
+            
             Scaricato da UCI ML Repository                       
             """)
             st.markdown("""
