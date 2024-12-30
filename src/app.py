@@ -1425,7 +1425,8 @@ class LuxuryRetailDashboard:
                 'Customer ID': 'nunique',
                 'Quantity': 'sum'
             }).round(2)
-            
+
+            # Calcolo variazioni YoY
             yoy_changes = {
                 'Revenue': ((metrics_by_year.loc[2011, 'Total_Value'] / 
                             metrics_by_year.loc[2010, 'Total_Value'] - 1) * 100).round(1),
@@ -1434,24 +1435,49 @@ class LuxuryRetailDashboard:
                 'Clienti': ((metrics_by_year.loc[2011, 'Customer ID'] / 
                             metrics_by_year.loc[2010, 'Customer ID'] - 1) * 100).round(1),
                 'Volume': ((metrics_by_year.loc[2011, 'Quantity'] / 
-                        metrics_by_year.loc[2010, 'Quantity'] - 1) * 100).round(1)
+                            metrics_by_year.loc[2010, 'Quantity'] - 1) * 100).round(1)
             }
-            
+
+            # Calcolo delta assoluti
+            absolute_changes = {
+                'Revenue': metrics_by_year.loc[2011, 'Total_Value'] - metrics_by_year.loc[2010, 'Total_Value'],
+                'Ordini': metrics_by_year.loc[2011, 'Invoice'] - metrics_by_year.loc[2010, 'Invoice'],
+                'Clienti': metrics_by_year.loc[2011, 'Customer ID'] - metrics_by_year.loc[2010, 'Customer ID'],
+                'Volume': metrics_by_year.loc[2011, 'Quantity'] - metrics_by_year.loc[2010, 'Quantity']
+            }
+
             st.subheader("Metriche Principali YoY")
             col1, col2, col3, col4 = st.columns(4)
-            
+
             with col1:
+                delta_color = "normal" if absolute_changes['Revenue'] >= 0 else "inverse"
                 st.metric(
                     "Revenue YoY", 
                     f"{yoy_changes['Revenue']}%",
-                    delta=f"€{(metrics_by_year.loc[2011, 'Total_Value'] - metrics_by_year.loc[2010, 'Total_Value']):,.0f}"
+                    delta=f"€{absolute_changes['Revenue']:,.0f}",
+                    delta_color=delta_color
                 )
             with col2:
-                st.metric("Ordini YoY", f"{yoy_changes['Ordini']}%")
+                delta_color = "normal" if yoy_changes['Ordini'] >= 0 else "inverse"
+                st.metric(
+                    "Ordini YoY", 
+                    f"{yoy_changes['Ordini']}%",
+                    delta_color=delta_color
+                )
             with col3:
-                st.metric("Clienti YoY", f"{yoy_changes['Clienti']}%")
+                delta_color = "normal" if yoy_changes['Clienti'] >= 0 else "inverse"
+                st.metric(
+                    "Clienti YoY", 
+                    f"{yoy_changes['Clienti']}%",
+                    delta_color=delta_color
+                )
             with col4:
-                st.metric("Volume YoY", f"{yoy_changes['Volume']}%")
+                delta_color = "normal" if yoy_changes['Volume'] >= 0 else "inverse"
+                st.metric(
+                    "Volume YoY", 
+                    f"{yoy_changes['Volume']}%",
+                    delta_color=delta_color
+                )
 
 
             st.markdown("""
