@@ -1726,20 +1726,64 @@ class LuxuryRetailDashboard:
             acquisition_rate = round((len(new_2011) / len(customers_2010) * 100), 1)
 
             col1, col2 = st.columns(2)
+            col1, col2 = st.columns(2)
             with col1:
+                retained_delta = f"-{len(customers_2010) - len(retained):,}"  # Numero di clienti persi
                 st.metric(
-                    "Retention Rate",
+                    "Retention Rate", 
                     f"{retention_rate}%",
-                    help=f"Clienti mantenuti: {len(retained)}"
+                    delta=retained_delta,
+                    delta_color="normal",
+                    help=f"Clienti mantenuti: {len(retained):,}"
                 )
             with col2:
+                acquisition_delta = f"+{len(new_2011):,}"  # Numero di nuovi clienti
                 st.metric(
-                    "Acquisition Rate",
+                    "Acquisition Rate", 
                     f"{acquisition_rate}%",
-                    help=f"Nuovi clienti 2011: {len(new_2011)}"
+                    delta=acquisition_delta,
+                    delta_color="normal",
+                    help=f"Nuovi clienti 2011: {len(new_2011):,}"
                 )
-            
-            
+            st.markdown("""
+                ### 📊 Interpretazione Metriche Retention
+
+                #### Performance Generale
+                - **Retention Rate del 62.9%**: Più della metà dei clienti 2010 ha continuato ad acquistare nel 2011
+                - **Acquisition Rate del 36.8%**: Significativa acquisizione di nuovi clienti, ma non sufficiente a compensare la perdita
+
+                #### Dettaglio Metriche
+                1. **Retention Rate** (62.9%)
+                - *Calcolo*: (Clienti attivi in entrambi gli anni / Clienti 2010) × 100
+                - Su {len(customers_2010):,} clienti del 2010, {len(retained):,} sono rimasti attivi nel 2011
+                - Rappresenta una buona base di clienti fedeli
+
+                2. **Acquisition Rate** (36.8%)
+                - *Calcolo*: (Nuovi clienti 2011 / Clienti 2010) × 100
+                - {len(new_2011):,} nuovi clienti acquisiti nel 2011
+                - Indica un buon potenziale di crescita del business
+
+                #### Insights Chiave
+                1. **Gap di Sostituzione**
+                - La perdita di clienti (37.1%) non è completamente compensata dai nuovi acquisiti (36.8%)
+                - Risultato: leggera contrazione della base clienti (-0.3%)
+
+                2. **Opportunità e Rischi**
+                - Buona capacità di mantenere la maggioranza dei clienti (>60%)
+                - Necessità di migliorare la conversione dei nuovi clienti in clienti fedeli
+                - Potenziale di crescita attraverso l'acquisizione di nuovi clienti
+
+                #### Suggerimenti Operativi
+                1. **Programma di Retention**:
+                - Identificare i fattori che caratterizzano i clienti fedeli
+                - Implementare programmi di fidelizzazione mirati
+                - Sviluppare comunicazioni personalizzate per i clienti a rischio
+
+                2. **Strategia di Acquisizione**:
+                - Analizzare i canali più efficaci per l'acquisizione
+                - Ottimizzare il costo di acquisizione cliente (CAC)
+                - Migliorare l'onboarding dei nuovi clienti
+                """)
             # 6. ANALISI STAGIONALE YOY
             st.markdown("---")
             st.subheader("Performance Stagionale YoY")
