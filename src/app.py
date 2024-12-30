@@ -1587,16 +1587,17 @@ class LuxuryRetailDashboard:
             # 5. ANALISI RETENTION
             st.markdown("---")
             st.subheader("Analisi Retention")
-            
+
             # Calcolo retention
             customers_2010 = set(df_yoy[df_yoy['year']==2010]['Customer ID'].unique())
             customers_2011 = set(df_yoy[df_yoy['year']==2011]['Customer ID'].unique())
             retained = customers_2010.intersection(customers_2011)
             new_2011 = customers_2011 - customers_2010
-            
-            retention_rate = (len(retained) / len(customers_2010) * 100).round(1)
-            acquisition_rate = (len(new_2011) / len(customers_2010) * 100).round(1)
-            
+
+            # Calcolo percentuali - usiamo round() invece di .round()
+            retention_rate = round((len(retained) / len(customers_2010) * 100), 1)
+            acquisition_rate = round((len(new_2011) / len(customers_2010) * 100), 1)
+
             col1, col2 = st.columns(2)
             with col1:
                 st.metric(
