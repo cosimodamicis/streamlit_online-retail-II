@@ -1846,29 +1846,6 @@ class LuxuryRetailDashboard:
 
             # 7. INSIGHTS TESTUALI
             st.markdown("---")
-            st.markdown("""
-            ### 🔍 Key Insights YoY
-
-            1. **Trend Generale**
-                - Confronto dell'andamento complessivo 2010 vs 2011
-                - Identificazione dei mesi di maggiore crescita/decrescita
-                - Pattern stagionali ricorrenti o modificati
-
-            2. **Performance per Segmento**
-                - Analisi dei segmenti trainanti
-                - Evoluzione del mix di revenue
-                - Cambiamenti nelle preferenze dei clienti
-
-            3. **Comportamento Cliente**
-                - Evoluzione del valore medio cliente
-                - Cambiamenti nella frequenza di acquisto
-                - Analisi della retention e acquisizione
-
-            4. **Opportunità Identificate**
-                - Periodi con maggior potenziale di crescita
-                - Segmenti con performance sotto le attese
-                - Aree di miglioramento nella retention
-            """)
             
         except Exception as e:
             st.error(f"Errore durante l'analisi YoY: {str(e)}")
