@@ -1450,33 +1450,32 @@ class LuxuryRetailDashboard:
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-                delta_color = "normal" if absolute_changes['Revenue'] >= 0 else "inverse"
                 st.metric(
                     "Revenue YoY", 
                     f"{yoy_changes['Revenue']}%",
-                    delta=f"€{absolute_changes['Revenue']:,.0f}",
-                    delta_color=delta_color
+                    delta=f"€{abs(absolute_changes['Revenue']):,.0f}",
+                    delta_color="normal" if absolute_changes['Revenue'] >= 0 else "inverse"
                 )
             with col2:
-                delta_color = "normal" if yoy_changes['Ordini'] >= 0 else "inverse"
                 st.metric(
                     "Ordini YoY", 
                     f"{yoy_changes['Ordini']}%",
-                    delta_color=delta_color
+                    delta=f"{abs(absolute_changes['Ordini']):,.0f}",
+                    delta_color="normal" if absolute_changes['Ordini'] >= 0 else "inverse"
                 )
             with col3:
-                delta_color = "normal" if yoy_changes['Clienti'] >= 0 else "inverse"
                 st.metric(
                     "Clienti YoY", 
                     f"{yoy_changes['Clienti']}%",
-                    delta_color=delta_color
+                    delta=f"{abs(absolute_changes['Clienti']):,.0f}",
+                    delta_color="normal" if absolute_changes['Clienti'] >= 0 else "inverse"
                 )
             with col4:
-                delta_color = "normal" if yoy_changes['Volume'] >= 0 else "inverse"
                 st.metric(
                     "Volume YoY", 
                     f"{yoy_changes['Volume']}%",
-                    delta_color=delta_color
+                    delta=f"{abs(absolute_changes['Volume']):,.0f}",
+                    delta_color="normal" if absolute_changes['Volume'] >= 0 else "inverse"
                 )
 
 
