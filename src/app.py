@@ -1878,6 +1878,11 @@ class LuxuryRetailDashboard:
             **Progetto**: Luxury Retail Analytics
             
             **Dataset**: Online Retail II
+            Scaricato da UCI ML Repository                       
+            """)
+            st.markdown("""
+            <a href="https://archive.ics.uci.edu/dataset/502/online+retail+ii" target="_blank">Link</a>
+            """, unsafe_allow_html=True)
             
             **Funzionalità**:
             - Analisi cliente
