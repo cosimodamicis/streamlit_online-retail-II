@@ -1883,7 +1883,7 @@ class LuxuryRetailDashboard:
             st.markdown("""
             <a href="https://archive.ics.uci.edu/dataset/502/online+retail+ii" target="_blank">Link</a>
             """, unsafe_allow_html=True)
-            
+            st.markdown("""
             **Funzionalità**:
             - Analisi cliente
             - Segmentazione RFM
