@@ -1986,11 +1986,11 @@ class LuxuryRetailDashboard:
                             return
                     
                     render_spark_analysis(st.session_state.spark_results)
-                    
+
             except Exception as e:
                 st.error(f"Si è verificato un errore nell'analisi: {str(e)}")
         
-        # Render sidebar
+        # Render sidebar #
         self.render_sidebar()
 
 if __name__ == "__main__":
