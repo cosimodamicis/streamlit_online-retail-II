@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-def create_spark_session():
+def create_spark_session_bak():
     """
     Crea una sessione Spark minima compatibile con Streamlit Cloud.
     """
@@ -24,6 +24,20 @@ def create_spark_session():
             .master("local[*]")
             .getOrCreate())
     
+    return spark
+
+def create_spark_session():
+    spark = (SparkSession.builder
+            .appName("LuxuryRetailAnalytics")
+            # Limita la memoria
+            .config("spark.driver.memory", "1g")
+            .config("spark.sql.shuffle.partitions", "2")
+            .config("spark.default.parallelism", "2")
+            # Ottimizza la garbage collection
+            .config("spark.memory.fraction", "0.6")
+            .config("spark.memory.storageFraction", "0.5")
+            .master("local[*]")
+            .getOrCreate())
     return spark
 
 def load_data_with_spark(df):
