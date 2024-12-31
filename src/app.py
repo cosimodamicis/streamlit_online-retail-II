@@ -1975,26 +1975,18 @@ class LuxuryRetailDashboard:
 
                 with tab8:
                     self.render_yoy_analysis(st.session_state.df)
-                    
+
                 with tab9:
                     if st.session_state.spark_df is None:
                         try:
-                            if data_option == "Usa dataset di default":
-                                file_path = os.path.join('data', 'online_retail_II.xlsx')
-                                st.session_state.spark_df = load_data_with_spark(file_path)
-                            else:
-                                if uploaded_file is not None:
-                                    st.session_state.spark_df = load_data_with_spark(uploaded_file)
-                                else:
-                                    st.warning("Carica un file per procedere con l'analisi Spark")
-                                    return
-                            
+                            st.session_state.spark_df = load_data_with_spark(st.session_state.df)
                             st.session_state.spark_results = perform_spark_analysis(st.session_state.spark_df)
                         except Exception as e:
                             st.error(f"Errore nel caricamento dei dati in Spark: {str(e)}")
                             return
                     
                     render_spark_analysis(st.session_state.spark_results)
+                    
             except Exception as e:
                 st.error(f"Si è verificato un errore nell'analisi: {str(e)}")
         

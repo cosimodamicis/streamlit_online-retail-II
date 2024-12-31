@@ -26,9 +26,9 @@ def create_spark_session():
     
     return spark
 
-def load_data_with_spark(file_path):
+def load_data_with_spark(df):
     """
-    Carica i dati Excel usando Spark.
+    Converte il DataFrame Pandas esistente in Spark DataFrame.
     """
     # Schema dei dati
     schema = StructType([
@@ -42,12 +42,10 @@ def load_data_with_spark(file_path):
         StructField("Country", StringType(), True)
     ])
     
-    # Leggi il file Excel come pandas e converti in Spark DataFrame
-    pdf = pd.read_excel(file_path)
     spark = create_spark_session()
-    df = spark.createDataFrame(pdf, schema=schema)
+    spark_df = spark.createDataFrame(df, schema=schema)
     
-    return df
+    return spark_df
 
 def perform_spark_analysis(spark_df):
     """
