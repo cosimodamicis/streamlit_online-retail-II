@@ -204,39 +204,45 @@ def render_spark_analysis(spark_results):
     st.subheader("RFM Insights (Spark)")
     rfm_pd = spark_results["rfm_analysis"].toPandas()
     
-    # Plot RFM distributions
-    col1, col2 = st.columns(2)
+    # Crea tre colonne per i box plots
+    col1, col2, col3 = st.columns(3)
+    
     with col1:
         fig_r = px.box(
             rfm_pd,
             y="recency",
-            title="Distribuzione Recency"
+            title="Distribuzione Recency (giorni)"
+        )
+        fig_r.update_layout(
+            height=400,
+            showlegend=False,
+            yaxis_title="Giorni dall'ultimo acquisto"
         )
         st.plotly_chart(fig_r, use_container_width=True)
     
     with col2:
+        fig_f = px.box(
+            rfm_pd,
+            y="frequency",
+            title="Distribuzione Frequency"
+        )
+        fig_f.update_layout(
+            height=400,
+            showlegend=False,
+            yaxis_title="Numero di ordini"
+        )
+        st.plotly_chart(fig_f, use_container_width=True)
+    
+    with col3:
         fig_m = px.box(
             rfm_pd,
             y="monetary",
-            title="Distribuzione Monetary"
+            title="Distribuzione Monetary (€)",
+            log_y=True  # Scala logaritmica solo per l'asse y
+        )
+        fig_m.update_layout(
+            height=400,
+            showlegend=False,
+            yaxis_title="Valore totale speso (€) - scala log"
         )
         st.plotly_chart(fig_m, use_container_width=True)
-    
-    st.markdown("""
-    ### Vantaggi dell'Analisi con Spark
-    
-    1. **Scalabilità**
-       - Processamento distribuito dei dati
-       - Gestione efficiente della memoria
-       - Parallelizzazione automatica delle operazioni
-    
-    2. **Performance**
-       - Ottimizzazione delle query con Catalyst Optimizer
-       - Lazy evaluation per operazioni efficienti
-       - Caching intelligente dei DataFrame
-    
-    3. **Funzionalità Avanzate**
-       - Window Functions per analisi temporali
-       - UDF per logiche custom
-       - APIs SQL-like per analisi complesse
-    """)
