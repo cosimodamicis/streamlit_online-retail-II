@@ -154,22 +154,51 @@ def render_spark_analysis(spark_results):
             f"€{perf_metrics['total_revenue'].iloc[0] / perf_metrics['total_transactions'].iloc[0]:,.2f}"
         )
     
-    # 2. Customer Lifetime Value Analysis
+        # 2. Customer Lifetime Value Analysis
     st.subheader("Customer Lifetime Value Analysis (Spark)")
     clv_pd = spark_results["clv_analysis"].toPandas()
     
-    # Plot CLV distribution
+    # Plot CLV distribution con scala logaritmica
     fig = px.histogram(
         clv_pd,
         x="clv_score",
         nbins=50,
-        title="Distribuzione Customer Lifetime Value"
+        title="Distribuzione Customer Lifetime Value",
+        log_x=True,  # Aggiunta scala logaritmica sull'asse x
+        log_y=True   # Aggiunta scala logaritmica sull'asse y
     )
     fig.update_layout(
-        xaxis_title="CLV Score (€/giorno)",
-        yaxis_title="Numero Clienti"
+        xaxis_title="CLV Score (€/giorno) - scala logaritmica",
+        yaxis_title="Numero Clienti (scala logaritmica)",
+        bargap=0.1   # Riduce lo spazio tra le barre per una migliore visualizzazione
     )
+    
+    # Aggiungi annotazione esplicativa
+    fig.add_annotation(
+        text="CLV Score = Spesa Totale / Giorni di attività del cliente",
+        xref="paper", yref="paper",
+        x=0, y=1.1,
+        showarrow=False,
+        font=dict(size=12)
+    )
+    
     st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("""
+    ### Interpretazione del CLV Score
+    
+    Il Customer Lifetime Value (CLV) Score rappresenta il valore medio giornaliero di un cliente, calcolato come:
+    - CLV Score = Spesa Totale del Cliente / Numero di giorni tra primo e ultimo acquisto
+    
+    Questo indicatore ci permette di:
+    1. Identificare i clienti più preziosi in termini di spesa giornaliera
+    2. Confrontare clienti con diverse durate di relazione
+    3. Prevedere il potenziale valore futuro dei clienti
+    
+    La scala logaritmica è utilizzata per:
+    - Asse X: Visualizzare meglio la distribuzione dei valori CLV che spaziano su diversi ordini di grandezza
+    - Asse Y: Evidenziare meglio la forma della distribuzione quando ci sono grandi differenze nel numero di clienti per fascia
+    """)
     
     # 3. RFM Insights
     st.subheader("RFM Insights (Spark)")
