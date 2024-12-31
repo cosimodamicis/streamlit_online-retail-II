@@ -224,7 +224,9 @@ def render_spark_analysis(spark_results):
         fig_f = px.box(
             rfm_pd,
             y="frequency",
-            title="Distribuzione Frequency"
+            title="Distribuzione Frequency",
+            log_y=True  # Scala logaritmica solo per l'asse y
+
         )
         fig_f.update_layout(
             height=400,
