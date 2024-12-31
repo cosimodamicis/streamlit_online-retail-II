@@ -1,2 +1,5 @@
 default-jre-headless
 python3-distutils
+libsnappy-dev
+libbz2-dev
+libhadoop2-client
