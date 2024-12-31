@@ -134,4 +134,7 @@ validators==0.34.0
 watchdog==6.0.0
     # via streamlit
 zipp==3.21.0
-    # via importlib-metadata
+    # via importlib-metadata+
+pyspark==3.5.0
+delta-spark==3.0.0
+    # adding support to Spark

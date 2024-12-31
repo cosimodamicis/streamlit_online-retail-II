@@ -23,6 +23,8 @@ from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
 from utils.preprocessing import consolidate_excel_sheets
+from spark_utils import load_data_with_spark, perform_spark_analysis, render_spark_analysis
+
 
 
 class LuxuryRetailDashboard:
@@ -41,7 +43,12 @@ class LuxuryRetailDashboard:
             st.session_state.customer_stats = None
         if 'data_loaded' not in st.session_state:
             st.session_state.data_loaded = False
-            
+
+        # Inizializzazione parte di Spark
+        if 'spark_df' not in st.session_state:
+            st.session_state.spark_df = None
+        if 'spark_results' not in st.session_state:
+            st.session_state.spark_results = None
     def render_header(self):
         """Render dell'header"""
         st.title("💎 Luxury Retail Analytics")
@@ -1928,7 +1935,7 @@ class LuxuryRetailDashboard:
                 # Render components
                 self.render_kpis(st.session_state.df, st.session_state.customer_stats)
                 
-                tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+                tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
                     "👥 Analisi Cliente",
                     "📊 Analisi RFM",
                     "🎯 Analisi Segmenti",
@@ -1936,7 +1943,8 @@ class LuxuryRetailDashboard:
                     "🔍 Analisi Prodotti Avanzata",
                     "💡 Business Insights",
                     "🔄 Analisi Retention",
-                    "📈 Analisi YoY"
+                    "📈 Analisi YoY",
+                    "🚀 Analisi Spark"
                 ])
             
                 with tab1:
@@ -1967,7 +1975,11 @@ class LuxuryRetailDashboard:
 
                 with tab8:
                     self.render_yoy_analysis(st.session_state.df)
-
+                with tab9:
+                    if st.session_state.spark_df is None:
+                        st.session_state.spark_df = load_data_with_spark(uploaded_file)
+                        st.session_state.spark_results = perform_spark_analysis(st.session_state.spark_df)
+                    render_spark_analysis(st.session_state.spark_results)
             except Exception as e:
                 st.error(f"Si è verificato un errore nell'analisi: {str(e)}")
         
