@@ -274,10 +274,20 @@ class LuxuryRetailDashboard:
                 labels=dict(x="Metrica RFM", y="Segmento", color="Score"),
                 aspect="auto",
                 title="RFM Heatmap per Segmento",
-                text=rfm_means.round(2),  # Aggiunge i valori numerici
-                color_continuous_scale="Blues"  # Mantiene la scala di blu coerente
+                color_continuous_scale="Blues"
             )
-            fig_heatmap.update_traces(texttemplate="%{text}", textfont=dict(size=12))  # Formatta il testo
+            
+            # Aggiungiamo i valori come annotazioni
+            for i in range(len(rfm_means.index)):
+                for j in range(len(rfm_means.columns)):
+                    fig_heatmap.add_annotation(
+                        text=f"{rfm_means.iloc[i, j]:.2f}",
+                        x=j,
+                        y=i,
+                        showarrow=False,
+                        font=dict(color="black", size=12)
+                    )
+            
             st.plotly_chart(fig_heatmap, use_container_width=True)
         
         # 2. Distribuzione componenti RFM per segmento
