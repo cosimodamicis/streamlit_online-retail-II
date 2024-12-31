@@ -164,7 +164,7 @@ def render_spark_analysis(spark_results):
         x="clv_score",
         nbins=50,
         title="Distribuzione Customer Lifetime Value",
-        log_x=True,  # Aggiunta scala logaritmica sull'asse x
+        #log_x=True,  # Aggiunta scala logaritmica sull'asse x
         log_y=True   # Aggiunta scala logaritmica sull'asse y
     )
     fig.update_layout(
