@@ -10,14 +10,17 @@ import streamlit as st
 
 def create_spark_session():
     """
-    Crea e configura una sessione Spark ottimizzata per l'ambiente Streamlit.
+    Crea una sessione Spark minima compatibile con Streamlit Cloud.
     """
     spark = (SparkSession.builder
             .appName("LuxuryRetailAnalytics")
             .config("spark.driver.memory", "2g")
             .config("spark.sql.session.timeZone", "UTC")
-            .config("spark.sql.execution.arrow.pyspark.enabled", "true")
-            .config("spark.sql.execution.arrow.pyspark.fallback.enabled", "true")
+            # Disabilita funzionalità Hadoop
+            .config("spark.hadoop.fs.defaultFS", "file:///")
+            .config("spark.driver.host", "localhost")
+            .config("spark.driver.bindAddress", "127.0.0.1")
+            .master("local[*]")
             .getOrCreate())
     
     return spark
