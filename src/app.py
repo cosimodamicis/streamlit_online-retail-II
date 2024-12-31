@@ -289,8 +289,7 @@ class LuxuryRetailDashboard:
                         bgcolor="rgba(255, 255, 255, 0.7)",  # Sfondo bianco semi-trasparente
                         bordercolor="rgba(255, 255, 255, 0)",  # Bordo trasparente
                         borderwidth=2,
-                        borderpad=4,  # Padding interno del box
-                        borderRadius=4  # Bordi arrotondati
+                        borderpad=3  # Padding interno del box
                     )
             
             st.plotly_chart(fig_heatmap, use_container_width=True)
