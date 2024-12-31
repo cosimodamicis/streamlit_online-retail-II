@@ -736,22 +736,34 @@ class LuxuryRetailDashboard:
         st.markdown("""
         ### Interpretazione della Concentrazione delle Vendite (Globale)
 
-        #### **Curva di Lorenz**
-        - La curva di Lorenz indica una **forte concentrazione delle vendite**, con una piccola frazione di prodotti che genera la maggior parte dei ricavi.
-        - Il **44.4% delle vendite totali** è generato dal **top 5% dei prodotti**, evidenziando che circa 200 prodotti dominano il mercato.
-        - Una curva più vicina all'angolo inferiore sinistro rispetto alla diagonale rossa tratteggiata riflette questa concentrazione.
+## Curva di Lorenz
 
-        #### **Tabella Riepilogativa**
-        - **N. Prodotti Totali**: 4017 prodotti analizzati.
-        - **Top 5% Prodotti Generano**: 44.4% del revenue totale.
-        - **N. Prodotti Top 5%**: 200 prodotti.
+-   La curva di Lorenz indica una **forte concentrazione delle vendite**, con una piccola frazione di prodotti che genera una parte significativa dei ricavi.
+-   Il **46.6% delle vendite totali** è generato dal **top 5% dei prodotti**, evidenziando che 231 prodotti dominano il mercato.
+-   La marcata curvatura verso l'angolo inferiore sinistro rispetto alla linea di uniformità (diagonale rossa tratteggiata) riflette questa forte concentrazione.
 
-        #### **Conclusioni e Implicazioni**
-        1. **Concentrazione significativa**: Una piccola frazione di prodotti (5%) genera quasi la metà delle vendite.
-        2. **Focalizzazione strategica**:
-        - **Best-seller**: Dare priorità al mantenimento delle scorte, pricing ottimizzato e promozioni mirate.
-        - **Prodotti a bassa performance**: Valutare opportunità di riposizionamento o eliminazione.
-        3. **Monitoraggio continuo**: Tenere sotto controllo la concentrazione per identificare cambiamenti strategici o potenziali rischi.
+## Tabella Riepilogativa
+
+-   **N. Prodotti Totali**: 4,631 prodotti analizzati
+-   **Top 5% Prodotti Generano**: 46.6% del revenue totale
+-   **N. Prodotti Top 5%**: 231 prodotti
+
+## Conclusioni e Implicazioni
+
+1.  **Concentrazione molto significativa**: Una piccola frazione di prodotti (5%) genera quasi la metà delle vendite, indicando una concentrazione ancora più marcata rispetto all'analisi precedente.
+2.  **Focalizzazione strategica**:
+    -   **Best-seller**: Concentrarsi sui 231 prodotti top performer per:
+        -   Ottimizzazione delle scorte
+        -   Strategie di pricing mirate
+        -   Promozioni personalizzate
+    -   **Prodotti a bassa performance**: Per i restanti 4,400 prodotti:
+        -   Valutare possibilità di razionalizzazione del catalogo
+        -   Identificare opportunità di riposizionamento
+        -   Considerare potenziali eliminazioni dei prodotti meno performanti
+3.  **Monitoraggio continuo**:
+    -   Mantenere un monitoraggio costante del livello di concentrazione
+    -   Identificare precocemente cambiamenti nei pattern di vendita
+    -   Valutare i rischi di una dipendenza così forte da un numero limitato di prodotti
         """)
 
 
