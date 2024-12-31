@@ -195,9 +195,7 @@ def render_spark_analysis(spark_results):
     2. Confrontare clienti con diverse durate di relazione
     3. Prevedere il potenziale valore futuro dei clienti
     
-    La scala logaritmica è utilizzata per:
-    - Asse X: Visualizzare meglio la distribuzione dei valori CLV che spaziano su diversi ordini di grandezza
-    - Asse Y: Evidenziare meglio la forma della distribuzione quando ci sono grandi differenze nel numero di clienti per fascia
+    La scala logaritmica è utilizzata per evidenziare meglio la forma della distribuzione quando ci sono grandi differenze nel numero di clienti per fascia
     """)
     
     # 3. RFM Insights

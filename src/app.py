@@ -49,6 +49,7 @@ class LuxuryRetailDashboard:
             st.session_state.spark_df = None
         if 'spark_results' not in st.session_state:
             st.session_state.spark_results = None
+            
     def render_header(self):
         """Render dell'header"""
         st.title("💎 Luxury Retail Analytics")
