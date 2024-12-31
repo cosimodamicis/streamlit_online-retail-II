@@ -7,6 +7,7 @@ from pyspark.sql.window import Window
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType, TimestampType
 import pandas as pd
 import streamlit as st
+import plotly.express as px
 
 def create_spark_session():
     """
