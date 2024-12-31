@@ -277,7 +277,7 @@ class LuxuryRetailDashboard:
                 color_continuous_scale="Blues"
             )
             
-            # Aggiungiamo i valori come annotazioni
+            # Aggiungiamo i valori come annotazioni con box di sfondo
             for i in range(len(rfm_means.index)):
                 for j in range(len(rfm_means.columns)):
                     fig_heatmap.add_annotation(
@@ -285,7 +285,12 @@ class LuxuryRetailDashboard:
                         x=j,
                         y=i,
                         showarrow=False,
-                        font=dict(color="black", size=12)
+                        font=dict(color="black", size=12),
+                        bgcolor="rgba(255, 255, 255, 0.7)",  # Sfondo bianco semi-trasparente
+                        bordercolor="rgba(255, 255, 255, 0)",  # Bordo trasparente
+                        borderwidth=2,
+                        borderpad=4,  # Padding interno del box
+                        borderRadius=4  # Bordi arrotondati
                     )
             
             st.plotly_chart(fig_heatmap, use_container_width=True)
