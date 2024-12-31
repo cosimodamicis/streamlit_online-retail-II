@@ -49,7 +49,7 @@ class LuxuryRetailDashboard:
             st.session_state.spark_df = None
         if 'spark_results' not in st.session_state:
             st.session_state.spark_results = None
-            
+
     def render_header(self):
         """Render dell'header"""
         st.title("💎 Luxury Retail Analytics")
@@ -273,8 +273,11 @@ class LuxuryRetailDashboard:
                 rfm_means,
                 labels=dict(x="Metrica RFM", y="Segmento", color="Score"),
                 aspect="auto",
-                title="RFM Heatmap per Segmento"
+                title="RFM Heatmap per Segmento",
+                text=rfm_means.round(2),  # Aggiunge i valori numerici
+                color_continuous_scale="Blues"  # Mantiene la scala di blu coerente
             )
+            fig_heatmap.update_traces(texttemplate="%{text}", textfont=dict(size=12))  # Formatta il testo
             st.plotly_chart(fig_heatmap, use_container_width=True)
         
         # 2. Distribuzione componenti RFM per segmento
