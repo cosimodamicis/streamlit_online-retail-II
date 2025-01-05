@@ -1979,7 +1979,7 @@ class LuxuryRetailDashboard:
             
                 with tab1:
                     # Mantenere solo la parte iniziale dell'analisi cliente
-                    # (fino a prima della sezione RFM)
+                    # (fino a prima della sezione RFM) 
                     self.render_customer_analysis(st.session_state.customer_stats, st.session_state.df)
                     
                 with tab2:

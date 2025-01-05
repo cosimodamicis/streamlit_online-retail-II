@@ -11,7 +11,7 @@ import plotly.express as px
 
 def create_spark_session_bak():
     """
-    Crea una sessione Spark minima compatibile con Streamlit Cloud.
+    Crea una sessione Spark minima compatibile con Streamlit Cloud. 
     """
     spark = (SparkSession.builder
             .appName("LuxuryRetailAnalytics")
